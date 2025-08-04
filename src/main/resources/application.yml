@@ -7,3 +7,14 @@ spring:
   application:
     name: common_backend
 
+
+# springdoc-openapi
+springdoc:
+  group-configs:
+    - group: 'default'
+      packages-to-scan: com.ezhixuan.common.common_backend.controller
+# knife4j
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn

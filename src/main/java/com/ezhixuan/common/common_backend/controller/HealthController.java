@@ -1,23 +1,28 @@
 package com.ezhixuan.common.common_backend.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.ezhixuan.common.common_backend.common.PageResponse;
+import com.ezhixuan.common.common_backend.common.R;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ezhixuan.common.common_backend.common.BaseResponse;
-import com.ezhixuan.common.common_backend.common.PageResponse;
-import com.ezhixuan.common.common_backend.common.R;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@Tag(name = "健康检查")
 @RestController
 public class HealthController {
 
+    @Operation(summary = "健康检查")
     @GetMapping("/health")
     public BaseResponse<String> isOk() {
         return R.SUCCESS;
     }
 
+    @Operation(summary = "列表")
     @GetMapping("/list")
     public PageResponse<String> list() {
         List<String> list = new ArrayList<>();
