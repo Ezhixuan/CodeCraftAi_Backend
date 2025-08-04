@@ -1,1 +1,9 @@
-spring.application.name=Common_Backend
+server:
+  port: 8911
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: common_backend
+
