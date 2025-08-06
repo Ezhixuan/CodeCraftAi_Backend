@@ -1,4 +1,4 @@
-package com.ezhixuan.common.common_backend.config;
+package com.ezhixuan.ai.codeCraftAi_backend.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

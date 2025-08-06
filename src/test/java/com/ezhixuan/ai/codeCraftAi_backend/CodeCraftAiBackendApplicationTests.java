@@ -1,10 +1,10 @@
-package com.ezhixuan.common.common_backend;
+package com.ezhixuan.ai.codeCraftAi_backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class CommonBackendApplicationTests {
+class CodeCraftAiBackendApplicationTests {
 
     @Test
     void contextLoads() {}

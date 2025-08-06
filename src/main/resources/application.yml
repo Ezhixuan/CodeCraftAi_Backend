@@ -5,7 +5,12 @@ server:
 
 spring:
   application:
-    name: common_backend
+    name: CodeCraftAi_backend
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 1q2w3e4r%
+    url: jdbc:mysql://localhost:3307/code_craft_ai_db
 
 
 # springdoc-openapi

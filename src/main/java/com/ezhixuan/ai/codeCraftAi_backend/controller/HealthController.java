@@ -1,13 +1,13 @@
-package com.ezhixuan.common.common_backend.controller;
+package com.ezhixuan.ai.codeCraftAi_backend.controller;
 
-import com.ezhixuan.common.common_backend.common.PageResponse;
-import com.ezhixuan.common.common_backend.common.R;
+import com.ezhixuan.ai.codeCraftAi_backend.common.PageResponse;
+import com.ezhixuan.ai.codeCraftAi_backend.common.R;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.ezhixuan.common.common_backend.common.BaseResponse;
+import com.ezhixuan.ai.codeCraftAi_backend.common.BaseResponse;
 
 import java.util.ArrayList;
 import java.util.List;

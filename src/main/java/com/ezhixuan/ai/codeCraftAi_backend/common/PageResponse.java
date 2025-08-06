@@ -1,4 +1,4 @@
-package com.ezhixuan.common.common_backend.common;
+package com.ezhixuan.ai.codeCraftAi_backend.common;
 
 import java.io.Serial;
 import java.util.List;

@@ -1,8 +1,8 @@
-package com.ezhixuan.common.common_backend.common;
+package com.ezhixuan.ai.codeCraftAi_backend.common;
 
 import java.util.List;
 
-import com.ezhixuan.common.common_backend.exception.ErrorCode;
+import com.ezhixuan.ai.codeCraftAi_backend.exception.ErrorCode;
 
 public class R {
     public static final BaseResponse<String> SUCCESS = new BaseResponse<>(ErrorCode.SUCCESS);
@@ -11,6 +11,10 @@ public class R {
 
     public static <T> BaseResponse<T> success(T data) {
         return new BaseResponse<>(data);
+    }
+
+    public static <T> BaseResponse<T> success() {
+        return new BaseResponse<>();
     }
 
     public static BaseResponse<String> error(int code, String message) {

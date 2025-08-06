@@ -1,4 +1,4 @@
-package com.ezhixuan.common.common_backend.exception;
+package com.ezhixuan.ai.codeCraftAi_backend.exception;
 
 import lombok.Getter;
 

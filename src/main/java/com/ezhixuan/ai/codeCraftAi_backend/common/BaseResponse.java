@@ -1,9 +1,9 @@
-package com.ezhixuan.common.common_backend.common;
+package com.ezhixuan.ai.codeCraftAi_backend.common;
 
 import java.io.Serial;
 import java.io.Serializable;
 
-import com.ezhixuan.common.common_backend.exception.ErrorCode;
+import com.ezhixuan.ai.codeCraftAi_backend.exception.ErrorCode;
 
 import lombok.Data;
 
