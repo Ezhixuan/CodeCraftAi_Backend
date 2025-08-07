@@ -1,12 +1,13 @@
 package com.ezhixuan.ai.codeCraftAi_backend.service;
 
-import com.ezhixuan.ai.codeCraftAi_backend.controller.user.vo.UserLoginReqVo;
-import com.ezhixuan.ai.codeCraftAi_backend.controller.user.vo.UserRegisterReqVo;
-import com.ezhixuan.ai.codeCraftAi_backend.controller.user.vo.UserResVo;
+import com.ezhixuan.ai.codeCraftAi_backend.controller.user.vo.*;
 import com.ezhixuan.ai.codeCraftAi_backend.domain.entity.SysUser;
+import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import java.util.List;
 
 /**
  *  服务层。
@@ -30,7 +31,7 @@ public interface SysUserService extends IService<SysUser> {
      * @param request 请求
      * @return UserResVo 脱敏后的用户信息
      */
-    UserResVo doLogin(UserLoginReqVo reqVo, HttpServletRequest request);
+    UserInfoCommonResVo doLogin(UserLoginReqVo reqVo, HttpServletRequest request);
 
     /**
      * 获取用户 vo 信息
@@ -38,7 +39,7 @@ public interface SysUserService extends IService<SysUser> {
      * @param user  用户信息
      * @return UserResVo 脱敏后的用户信息
      */
-    UserResVo getUserVo(SysUser user);
+    UserInfoCommonResVo getUserVo(SysUser user);
 
     /**
      * 获取用户 vo 信息
@@ -46,7 +47,7 @@ public interface SysUserService extends IService<SysUser> {
      * @param request 请求
      * @return UserResVo 脱敏后的用户信息
      */
-    UserResVo getUserVo(HttpServletRequest request);
+    UserInfoCommonResVo getUserVo(HttpServletRequest request);
 
     /**
      * 用户退出
@@ -54,4 +55,35 @@ public interface SysUserService extends IService<SysUser> {
      * @param request 请求
      */
     void doLogout(HttpServletRequest request);
+
+    /**
+     * 批量新增用户
+     * @author Ezhixuan
+     * @param waitAddList 新增用户列表
+     * @return List<UserAddResVo> 新增成功的用户信息
+     */
+    List<UserAddResVo> saveBatch(List<UserAddReqVo> waitAddList);
+
+    /**
+     * 批量创建 size 个用户账号
+     * @author Ezhixuan
+     * @param size 创建数量
+     * @return List<UserAddResVo> 创建成功的用户信息
+     */
+    List<UserAddResVo> saveBatch(Integer size);
+
+    /**
+     * 账号停用
+     * @author Ezhixuan
+     * @param disableId 停用账号 Id
+     */
+    void doDisable(Long disableId);
+
+    /**
+     * 分页查询用户信息
+     * @author Ezhixuan
+     * @param queryReqVo 查询参数
+     * @return Page<SysUser> 用户信息
+     */
+    Page<UserInfoAdminResVo> getList(UserQueryReqVo queryReqVo);
 }

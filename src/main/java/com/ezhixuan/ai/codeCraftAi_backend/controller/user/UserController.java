@@ -1,15 +1,18 @@
 package com.ezhixuan.ai.codeCraftAi_backend.controller.user;
 
+import java.util.List;
+
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import com.ezhixuan.ai.codeCraftAi_backend.annotation.AuthRole;
 import com.ezhixuan.ai.codeCraftAi_backend.common.BaseResponse;
+import com.ezhixuan.ai.codeCraftAi_backend.common.PageResponse;
 import com.ezhixuan.ai.codeCraftAi_backend.common.R;
-import com.ezhixuan.ai.codeCraftAi_backend.controller.user.vo.UserLoginReqVo;
-import com.ezhixuan.ai.codeCraftAi_backend.controller.user.vo.UserRegisterReqVo;
-import com.ezhixuan.ai.codeCraftAi_backend.controller.user.vo.UserResVo;
+import com.ezhixuan.ai.codeCraftAi_backend.controller.user.vo.*;
 import com.ezhixuan.ai.codeCraftAi_backend.service.SysUserService;
 
+import cn.hutool.core.bean.BeanUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,13 +36,13 @@ public class UserController {
 
     @Operation(summary = "用户登录")
     @PostMapping("/login")
-    public BaseResponse<UserResVo> doLogin(@RequestBody @Valid UserLoginReqVo reqVo, HttpServletRequest request) {
+    public BaseResponse<UserInfoCommonResVo> doLogin(@RequestBody @Valid UserLoginReqVo reqVo, HttpServletRequest request) {
         return R.success(userService.doLogin(reqVo, request));
     }
 
     @Operation(summary = "获取用户信息")
     @GetMapping
-    public BaseResponse<UserResVo> getUserInfo(HttpServletRequest request) {
+    public BaseResponse<UserInfoCommonResVo> getUserInfo(HttpServletRequest request) {
         return R.success(userService.getUserVo(request));
     }
 
@@ -48,5 +51,41 @@ public class UserController {
     public BaseResponse<Void> logout(HttpServletRequest request) {
         userService.doLogout(request);
         return R.success();
+    }
+
+    @Operation(summary = "新增用户(支持批量)")
+    @AuthRole
+    @PutMapping("/add")
+    public PageResponse<UserAddResVo> add(@RequestBody List<UserAddReqVo> waitAddList) {
+        return R.list(userService.saveBatch(waitAddList));
+    }
+
+    @Operation(summary = "新增用户(支持批量)")
+    @AuthRole
+    @PutMapping("/add/{size}")
+    public PageResponse<UserAddResVo> add(@PathVariable Integer size) {
+        return R.list(userService.saveBatch(size));
+    }
+
+    @Operation(summary = "停用账号")
+    @AuthRole
+    @PutMapping("/disable/{disableId}")
+    public BaseResponse<Void> disable(@PathVariable Long disableId) {
+        userService.doDisable(disableId);
+        return R.success();
+    }
+
+    @Operation(summary = "获取用户信息(完整)")
+    @AuthRole
+    @GetMapping("/{id}/admin")
+    public BaseResponse<UserInfoAdminResVo> getUserInfo(@PathVariable Long id) {
+        return R.success(BeanUtil.copyProperties(userService.getById(id), UserInfoAdminResVo.class));
+    }
+
+    @Operation(summary = "获取用户列表")
+    @AuthRole
+    @GetMapping("/list")
+    public PageResponse<UserInfoAdminResVo> getList(@Valid UserQueryReqVo queryReqVo) {
+        return R.list(userService.getList(queryReqVo));
     }
 }
