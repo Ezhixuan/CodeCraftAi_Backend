@@ -2,6 +2,7 @@ package com.ezhixuan.codeCraftAi_backend.service.impl;
 
 import static com.ezhixuan.codeCraftAi_backend.domain.enums.UserRoleEnum.ADMIN;
 import static com.ezhixuan.codeCraftAi_backend.domain.enums.UserRoleEnum.getByRole;
+import static com.ezhixuan.codeCraftAi_backend.utils.UserUtil.*;
 import static java.util.Objects.isNull;
 
 import java.util.ArrayList;
@@ -11,7 +12,6 @@ import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.DigestUtils;
 
 import com.ezhixuan.codeCraftAi_backend.common.PageRequest;
 import com.ezhixuan.codeCraftAi_backend.config.prop.SystemProp;
@@ -24,7 +24,6 @@ import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
 import com.ezhixuan.codeCraftAi_backend.mapper.SysUserMapper;
 import com.ezhixuan.codeCraftAi_backend.service.SysUserService;
-import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
@@ -100,7 +99,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Override
     public UserInfoCommonResVo getUserVo(HttpServletRequest request) {
         // 判断用户是否已登录
-        SysUser byId = getById(UserUtil.getLoginUserId(request));
+        SysUser byId = getById(getLoginUserId(request));
         if (isNull(byId)) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
@@ -117,7 +116,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public void doLogout(HttpServletRequest request) {
-        UserUtil.getLoginUserInfo(request);
+        getLoginUserInfo(request);
         request.getSession().removeAttribute(UserConstant.USER_LOGIN_STATE);
     }
 
@@ -165,11 +164,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Override
     public Page<UserInfoAdminResVo> getList(UserQueryReqVo queryReqVo) {
         return PageRequest.convert(page(queryReqVo.toPage(), getQueryWrapper(queryReqVo)), UserInfoAdminResVo.class);
-    }
-
-    @Override
-    public String getEncryptedPassword(String password) {
-        return DigestUtils.md5DigestAsHex((password + prop.getSalt()).getBytes());
     }
 
     /**

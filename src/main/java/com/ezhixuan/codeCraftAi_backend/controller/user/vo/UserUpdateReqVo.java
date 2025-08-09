@@ -9,7 +9,6 @@ import org.hibernate.validator.constraints.Length;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysUser;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
-import com.ezhixuan.codeCraftAi_backend.service.SysUserService;
 import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -43,14 +42,14 @@ public class UserUpdateReqVo implements Serializable {
     @Schema(description = "用户邮箱")
     private String email;
 
-    public SysUser toUser(SysUserService service) {
+    public SysUser toUser() {
         if (!Objects.equals(id, UserUtil.getLoginUserId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         SysUser user = new SysUser();
         user.setId(id);
         if (Objects.nonNull(password)) {
-            user.setPassword(service.getEncryptedPassword(password));
+            user.setPassword(UserUtil.getEncryptedPassword(password));
         }
         user.setName(name);
         user.setAvatar(avatar);

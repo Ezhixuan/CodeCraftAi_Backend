@@ -94,12 +94,4 @@ public interface SysUserService extends IService<SysUser> {
      * @return Page<SysUser> 用户信息
      */
     Page<UserInfoAdminResVo> getList(UserQueryReqVo queryReqVo);
-
-    /**
-     * 密码加密
-     * @author Ezhixuan
-     * @param password 密码
-     * @return String 加密后的密码
-     */
-    String getEncryptedPassword(String password);
 }

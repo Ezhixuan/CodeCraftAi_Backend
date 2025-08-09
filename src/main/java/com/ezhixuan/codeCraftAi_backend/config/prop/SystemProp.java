@@ -11,9 +11,6 @@ import lombok.Data;
 @Configuration
 public class SystemProp {
 
-    @Schema(description = "系统盐")
-    private String salt = "xuanAi";
-
     @Schema(description = "默认密码")
     private String defaultPassword = "123456";
 }

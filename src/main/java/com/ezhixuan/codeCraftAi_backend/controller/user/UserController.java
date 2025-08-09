@@ -56,7 +56,7 @@ public class UserController {
     @Operation(summary = "修改用户信息")
     @PostMapping
     public BaseResponse<UserInfoCommonResVo> updateUserInfo(@Valid @RequestBody UserUpdateReqVo updateReqVo) {
-        userService.updateById(updateReqVo.toUser(userService));
+        userService.updateById(updateReqVo.toUser());
         return R.success(userService.getUserVo(updateReqVo.getId()));
     }
 
