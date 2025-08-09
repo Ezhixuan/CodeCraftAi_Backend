@@ -11,6 +11,8 @@ spring:
     username: root
     password: 1q2w3e4r%
     url: jdbc:mysql://localhost:3307/code_craft_ai_db
+  profiles:
+    active: @profiles.active@
 
 
 # springdoc-openapi
