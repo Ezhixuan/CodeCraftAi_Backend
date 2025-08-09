@@ -1,5 +1,6 @@
 package com.ezhixuan.codeCraftAi_backend.controller.user.vo;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -10,6 +11,9 @@ import lombok.Data;
 
 @Data
 public class UserInfoCommonResVo implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 6830855177445421992L;
 
     @Schema(description = "用户id")
     private Long id;

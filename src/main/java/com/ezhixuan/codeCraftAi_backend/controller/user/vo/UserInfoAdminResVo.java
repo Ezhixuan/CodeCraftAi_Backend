@@ -1,5 +1,7 @@
 package com.ezhixuan.codeCraftAi_backend.controller.user.vo;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -8,7 +10,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
-public class UserInfoAdminResVo {
+public class UserInfoAdminResVo implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 8165177433761752690L;
 
     @Schema(description = "用户id")
     private Long id;

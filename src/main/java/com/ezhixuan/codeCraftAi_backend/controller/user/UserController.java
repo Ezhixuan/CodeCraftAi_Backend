@@ -48,9 +48,16 @@ public class UserController {
 
     @Operation(summary = "退出登录")
     @PostMapping("/logout")
-    public BaseResponse<Void> logout(HttpServletRequest request) {
+    public BaseResponse<Void> doLogout(HttpServletRequest request) {
         userService.doLogout(request);
         return R.success();
+    }
+
+    @Operation(summary = "修改用户信息")
+    @PostMapping
+    public BaseResponse<UserInfoCommonResVo> updateUserInfo(@Valid @RequestBody UserUpdateReqVo updateReqVo) {
+        userService.updateById(updateReqVo.toUser(userService));
+        return R.success(userService.getUserVo(updateReqVo.getId()));
     }
 
     @Operation(summary = "新增用户(支持批量)")

@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysUser;
 import com.ezhixuan.codeCraftAi_backend.domain.enums.UserRoleEnum;
-import com.ezhixuan.codeCraftAi_backend.service.impl.SysUserServiceImpl;
+import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import cn.hutool.core.util.RandomUtil;
@@ -27,7 +27,7 @@ public class UserAddReqVo implements Serializable {
     private String name;
 
     @JsonIgnore
-    public SysUser toUser(SysUserServiceImpl service, String defaultPassword) {
+    public SysUser toUser(String defaultPassword) {
         if (!hasText(account)) {
             account = RandomUtil.randomString(10);
         }
@@ -39,7 +39,7 @@ public class UserAddReqVo implements Serializable {
         user.setName(name);
         user.setRole(UserRoleEnum.USER.getRole());
         user.setStatus(1);
-        user.setPassword(service.getEncryptedPassword(defaultPassword));
+        user.setPassword(UserUtil.getEncryptedPassword(defaultPassword));
         return user;
     }
 }

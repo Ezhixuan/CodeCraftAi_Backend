@@ -10,7 +10,6 @@ import java.io.Serial;
 import java.io.Serializable;
 
 @Data
-@Schema(description = "用户注册请求参数")
 public class UserRegisterReqVo implements Serializable {
 
     @Serial

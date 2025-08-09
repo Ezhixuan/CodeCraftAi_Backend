@@ -50,6 +50,14 @@ public interface SysUserService extends IService<SysUser> {
     UserInfoCommonResVo getUserVo(HttpServletRequest request);
 
     /**
+     * 通过 id 获取用户 vo 信息
+     * @author Ezhixuan
+     * @param id 用户 Id
+     * @return UserInfoCommonResVo 脱敏后的用户信息
+     */
+    UserInfoCommonResVo getUserVo(Long id);
+
+    /**
      * 用户退出
      * @author Ezhixuan
      * @param request 请求
@@ -86,4 +94,12 @@ public interface SysUserService extends IService<SysUser> {
      * @return Page<SysUser> 用户信息
      */
     Page<UserInfoAdminResVo> getList(UserQueryReqVo queryReqVo);
+
+    /**
+     * 密码加密
+     * @author Ezhixuan
+     * @param password 密码
+     * @return String 加密后的密码
+     */
+    String getEncryptedPassword(String password);
 }

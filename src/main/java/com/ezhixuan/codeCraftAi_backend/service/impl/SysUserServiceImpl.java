@@ -24,6 +24,7 @@ import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
 import com.ezhixuan.codeCraftAi_backend.mapper.SysUserMapper;
 import com.ezhixuan.codeCraftAi_backend.service.SysUserService;
+import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
@@ -90,18 +91,16 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public UserInfoCommonResVo getUserVo(SysUser user) {
+        if (isNull(user)) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
         return BeanUtil.copyProperties(user, UserInfoCommonResVo.class);
     }
 
     @Override
     public UserInfoCommonResVo getUserVo(HttpServletRequest request) {
         // 判断用户是否已登录
-        SysUser user = getUserByHttpReq(request);
-        Long id = user.getId();
-        if (isNull(id)) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
-        }
-        SysUser byId = getById(id);
+        SysUser byId = getById(UserUtil.getLoginUserId(request));
         if (isNull(byId)) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
         }
@@ -109,8 +108,16 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
+    public UserInfoCommonResVo getUserVo(Long id) {
+        if (isNull(id)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        return getUserVo(getById(id));
+    }
+
+    @Override
     public void doLogout(HttpServletRequest request) {
-        getUserByHttpReq(request);
+        UserUtil.getLoginUserInfo(request);
         request.getSession().removeAttribute(UserConstant.USER_LOGIN_STATE);
     }
 
@@ -119,7 +126,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         if (CollectionUtils.isEmpty(waitAddList)) {
             return Collections.emptyList();
         }
-        List<SysUser> list = waitAddList.stream().map(add -> add.toUser(this, prop.getDefaultPassword())).toList();
+        List<SysUser> list = waitAddList.stream().map(add -> add.toUser(prop.getDefaultPassword())).toList();
         saveBatch(list);
         return toAddResVo(list);
     }
@@ -160,13 +167,31 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         return PageRequest.convert(page(queryReqVo.toPage(), getQueryWrapper(queryReqVo)), UserInfoAdminResVo.class);
     }
 
+    @Override
+    public String getEncryptedPassword(String password) {
+        return DigestUtils.md5DigestAsHex((password + prop.getSalt()).getBytes());
+    }
+
+    /**
+     * 构建 queryWrapper
+     * @author Ezhixuan
+     * @param queryReqVo 查询条件
+     * @return QueryWrapper 查询条件
+     */
     private QueryWrapper getQueryWrapper(UserQueryReqVo queryReqVo) {
         return QueryWrapper.create().like(SysUser::getAccount, queryReqVo.getAccount())
             .like(SysUser::getName, queryReqVo.getName()).eq(SysUser::getRole, queryReqVo.getRole())
             .eq(SysUser::getStatus, queryReqVo.getStatus())
+            .eq(SysUser::getId, queryReqVo.getId())
             .orderBy(SysUser::getUpdateTime, Objects.equals(queryReqVo.getOrderBy(), PageRequest.ASC));
     }
 
+    /**
+     * 转换为 AddResVo
+     * @author Ezhixuan
+     * @param userList 用户列表
+     * @return List<UserAddResVo> 转换后的用户列表
+     */
     private List<UserAddResVo> toAddResVo(List<SysUser> userList) {
         return userList.stream().map(user -> {
             UserAddResVo userAddResVo = new UserAddResVo();
@@ -174,28 +199,5 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             userAddResVo.setPassword(prop.getDefaultPassword());
             return userAddResVo;
         }).toList();
-    }
-
-    /**
-     * 通过 httpRequest 获取用户信息
-     * @param request 请求
-     * @return 用户信息
-     */
-    private SysUser getUserByHttpReq(HttpServletRequest request) {
-        Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
-        if (isNull(userObj)) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
-        }
-        return (SysUser)userObj;
-    }
-
-    /**
-     * 加密
-     *
-     * @param password 密码
-     * @return 加密后的密码
-     */
-    public String getEncryptedPassword(String password) {
-        return DigestUtils.md5DigestAsHex((password + prop.getSalt()).getBytes());
     }
 }
