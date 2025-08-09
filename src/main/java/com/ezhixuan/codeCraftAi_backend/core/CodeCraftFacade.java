@@ -9,6 +9,8 @@ import com.ezhixuan.codeCraftAi_backend.ai.CodeCraftAiChatService;
 import com.ezhixuan.codeCraftAi_backend.ai.model.AiChatHtmlCssScriptResDto;
 import com.ezhixuan.codeCraftAi_backend.ai.model.AiChatHtmlResDto;
 import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
+import com.ezhixuan.codeCraftAi_backend.core.parse.CodeParserExecutor;
+import com.ezhixuan.codeCraftAi_backend.core.saver.FileSaverExecutor;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
 
@@ -36,85 +38,52 @@ public class CodeCraftFacade {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请选择代码生成模式");
         }
         return switch (codeGenType) {
-            case HTML -> chatAndSaveHtml(userMessage);
-            case HTML_MULTI_FILE -> chatAndSaveHtmlMultiFile(userMessage);
+            case HTML -> {
+                AiChatHtmlResDto aiChatHtmlResDto = chatService.chatHtml(userMessage);
+                yield FileSaverExecutor.executeSave(aiChatHtmlResDto, codeGenType);
+            }
+            case HTML_MULTI_FILE -> {
+                AiChatHtmlCssScriptResDto aiChatHtmlCssScriptResDto = chatService.chatHtmlCssScript(userMessage);
+                yield FileSaverExecutor.executeSave(aiChatHtmlCssScriptResDto, codeGenType);
+            }
             default -> {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "请选择正确的代码生成模式");
             }
         };
     }
 
+    /**
+     * 聊天并保存 (流式)
+     *
+     * @param userMessage 用户消息
+     * @param codeGenType 代码生成类型
+     * @return Flux 流
+     */
     public Flux<String> chatAndSaveStream(String userMessage, CodeGenTypeEnum codeGenType) {
         if (Objects.isNull(codeGenType)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请选择代码生成模式");
         }
         return switch (codeGenType) {
-            case HTML -> chatAndSaveHtmlStream(userMessage);
-            case HTML_MULTI_FILE -> chatAndSaveHtmlMultiFileStream(userMessage);
+            case HTML -> {
+                Flux<String> stringFlux = chatService.chatHtmlStream(userMessage);
+                yield chatAndSaveStream(stringFlux, codeGenType);
+            }
+            case HTML_MULTI_FILE -> {
+                Flux<String> stringFlux = chatService.chatHtmlCssScriptStream(userMessage);
+                yield chatAndSaveStream(stringFlux, codeGenType);
+            }
             default -> {
                 throw new BusinessException(ErrorCode.PARAMS_ERROR, "请选择正确的代码生成模式");
             }
         };
     }
 
-    /**
-     * 聊天并保存 单个 html 文件
-     *
-     * @author Ezhixuan
-     * @param userMessage 用户消息
-     * @return 文件
-     */
-    private File chatAndSaveHtml(String userMessage) {
-        AiChatHtmlResDto aiChatHtmlResDto = chatService.chatHtml(userMessage);
-        return CodeFileProducer.produce(aiChatHtmlResDto);
-    }
-
-    /**
-     * 聊天并保存 以 html, css, script 三个文件
-     *
-     * @author Ezhixuan
-     * @param userMessage 用户消息
-     * @return 文件
-     */
-    private File chatAndSaveHtmlMultiFile(String userMessage) {
-        AiChatHtmlCssScriptResDto aiChatHtmlCssScriptResDto = chatService.chatHtmlCssScript(userMessage);
-        return CodeFileProducer.produce(aiChatHtmlCssScriptResDto);
-    }
-
-    /**
-     * 聊天并保存 单个 html 文件 (流式)
-     *
-     * @author Ezhixuan
-     * @param userMessage 用户消息
-     * @return 文件
-     */
-    private Flux<String> chatAndSaveHtmlStream(String userMessage) {
-        Flux<String> chatHtmlStream = chatService.chatHtmlStream(userMessage);
+    private Flux<String> chatAndSaveStream(Flux<String> chatStream, CodeGenTypeEnum codeGenTypeEnum) {
         StringBuilder content = new StringBuilder();
-        return chatHtmlStream.doOnNext(content::append).doOnComplete(() -> {
+        return chatStream.doOnNext(content::append).doOnComplete(() -> {
             try {
-                File file = CodeFileProducer.produce(CodeCraftContentParseUtil.parseHtml(content.toString()));
-                log.info("保存文件成功：{}", file.getAbsolutePath());
-            } catch (Exception e) {
-                log.error("解析 html 失败", e);
-            }
-        });
-    }
-
-    /**
-     * 聊天并保存 以 html, css, script 三个文件 (流式)
-     *
-     * @author Ezhixuan
-     * @param userMessage 用户消息
-     * @return 文件
-     */
-    private Flux<String> chatAndSaveHtmlMultiFileStream(String userMessage) {
-        Flux<String> chatHtmlCssScriptStream = chatService.chatHtmlCssScriptStream(userMessage);
-        StringBuilder content = new StringBuilder();
-        return chatHtmlCssScriptStream.doOnNext(content::append).doOnComplete(() -> {
-            try {
-                File file = CodeFileProducer.produce(CodeCraftContentParseUtil.parseHtmlCssScript(content.toString()));
-                log.info("保存文件成功：{}", file.getAbsolutePath());
+                FileSaverExecutor.executeSave(CodeParserExecutor.executeParse(content.toString(), codeGenTypeEnum),
+                    codeGenTypeEnum);
             } catch (Exception e) {
                 log.error("解析 html 失败", e);
             }
