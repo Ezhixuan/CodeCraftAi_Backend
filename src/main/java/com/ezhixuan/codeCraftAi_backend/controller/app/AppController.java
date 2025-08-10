@@ -6,12 +6,13 @@ import java.util.stream.Collectors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.ezhixuan.codeCraftAi_backend.annotation.AuthRole;
 import com.ezhixuan.codeCraftAi_backend.common.BaseResponse;
 import com.ezhixuan.codeCraftAi_backend.common.PageResponse;
 import com.ezhixuan.codeCraftAi_backend.common.R;
-import com.ezhixuan.codeCraftAi_backend.controller.app.vo.*;
-import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoAdminResVo;
+import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppGenerateReqVo;
+import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppInfoCommonResVo;
+import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppQueryReqVo;
+import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppUpdateCommonReqVo;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
@@ -20,7 +21,6 @@ import com.ezhixuan.codeCraftAi_backend.service.SysUserService;
 import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import com.mybatisflex.core.paginate.Page;
 
-import cn.hutool.core.bean.BeanUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -42,7 +42,16 @@ public class AppController {
         return R.success(appService.doGenerate(reqVo));
     }
 
-    @Operation(summary = "获取用户应用列表(用户)")
+    @Operation(summary = "获取应用详情")
+    @GetMapping("/{id}")
+    public BaseResponse<AppInfoCommonResVo> getInfo(@PathVariable Long id) {
+        SysApp sysApp = appService.getById(id);
+        AppInfoCommonResVo appInfoCommonResVo = new AppInfoCommonResVo();
+        appInfoCommonResVo.build(sysApp, userService.getUserVo(sysApp.getId()));
+        return R.success(appInfoCommonResVo);
+    }
+
+    @Operation(summary = "获取用户应用列表")
     @GetMapping("/list")
     public PageResponse<AppInfoCommonResVo> getList(@RequestBody AppQueryReqVo queryReqVo) {
         Page<SysApp> sysAppPage = appService.getList(queryReqVo, true);
@@ -50,30 +59,12 @@ public class AppController {
         return R.list(appService.convert2Common(sysAppPage, userService.getUserInfoCommonMap(userIds)));
     }
 
-    @Operation(summary = "获取用户应用列表(管理员)")
-    @AuthRole
-    @GetMapping("/admin/list")
-    public PageResponse<AppInfoAdminResVo> adminGetList(@RequestBody AppQueryReqVo queryReqVo) {
-        Page<SysApp> sysAppPage = appService.getList(queryReqVo, false);
-        Set<Long> userIds = sysAppPage.getRecords().stream().map(SysApp::getUserId).collect(Collectors.toSet());
-        return R.list(appService.convert2Admin(sysAppPage, userService.getUserInfoAdminMap(userIds)));
-    }
-
-    @Operation(summary = "更新应用信息(用户)")
+    @Operation(summary = "更新应用信息")
     @PostMapping("/update")
     public BaseResponse<Void> update(@RequestBody @Valid AppUpdateCommonReqVo updateReqVo) {
         if (!UserUtil.isMe(updateReqVo.getId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
-        SysApp entity = updateReqVo.toEntity();
-        appService.updateById(entity);
-        return R.success();
-    }
-
-    @Operation(summary = "更新应用信息(管理员)")
-    @AuthRole
-    @PostMapping("/admin/update")
-    public BaseResponse<Void> adminUpdate(@RequestBody @Valid AppUpdateAdminReqVo updateReqVo) {
         SysApp entity = updateReqVo.toEntity();
         appService.updateById(entity);
         return R.success();
@@ -87,23 +78,5 @@ public class AppController {
         }
         appService.removeById(id);
         return R.success();
-    }
-
-    @Operation(summary = "获取应用详情 (用户)")
-    @GetMapping("/{id}")
-    public BaseResponse<AppInfoCommonResVo> getInfo(@PathVariable Long id) {
-        SysApp sysApp = appService.getById(id);
-        AppInfoCommonResVo appInfoCommonResVo = new AppInfoCommonResVo();
-        appInfoCommonResVo.build(sysApp, userService.getUserVo(sysApp.getId()));
-        return R.success(appInfoCommonResVo);
-    }
-
-    @Operation(summary = "获取应用详情 (管理员)")
-    @GetMapping("/admin/{id}")
-    public BaseResponse<AppInfoAdminResVo> adminGetInfo(@PathVariable Long id) {
-        SysApp sysApp = appService.getById(id);
-        AppInfoAdminResVo appInfoAdminResVo = new AppInfoAdminResVo();
-        appInfoAdminResVo.build(sysApp, BeanUtil.copyProperties(userService.getById(id), UserInfoAdminResVo.class));
-        return R.success(appInfoAdminResVo);
     }
 }
