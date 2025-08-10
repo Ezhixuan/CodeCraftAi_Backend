@@ -1,5 +1,7 @@
 package com.ezhixuan.codeCraftAi_backend.controller.app;
 
+import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
+import com.mybatisflex.core.paginate.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +38,14 @@ public class AppController {
     @Operation(summary = "获取用户应用列表(用户)")
     @GetMapping("/list")
     public PageResponse<AppInfoCommonResVo> getList(@RequestBody AppQueryReqVo queryReqVo) {
-        return R.list(appService.getList(queryReqVo));
+        Page<SysApp> sysAppPage = appService.getList(queryReqVo, true);
+        return R.list();
+    }
+
+    @Operation(summary = "获取用户应用列表(用户)")
+    @GetMapping("/admin/list")
+    public PageResponse<AppInfoCommonResVo> adminGetList(@RequestBody AppQueryReqVo queryReqVo) {
+        Page<SysApp> sysAppPage = appService.getList(queryReqVo, false);
+        return R.list();
     }
 }

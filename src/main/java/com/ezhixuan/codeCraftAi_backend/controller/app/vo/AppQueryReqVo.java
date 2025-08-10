@@ -38,9 +38,9 @@ public class AppQueryReqVo extends PageRequest implements Serializable {
     @Schema(description = "用户 id")
     private Long userId;
 
-    @Schema(description = " 创建时间")
-    private LocalDateTime createTime;
+    @Schema(description = "开始时间")
+    private LocalDateTime startTime;
 
-    @Schema(description = "更新时间")
-    private LocalDateTime updateTime;
+    @Schema(description = "结束时间")
+    private LocalDateTime endTime;
 }

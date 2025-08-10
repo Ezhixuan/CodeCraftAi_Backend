@@ -1,16 +1,24 @@
 package com.ezhixuan.codeCraftAi_backend.service.impl;
 
-import java.time.LocalDateTime;
+import static java.util.Objects.isNull;
+import static org.springframework.util.CollectionUtils.isEmpty;
+
+import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 
 import com.ezhixuan.codeCraftAi_backend.common.PageRequest;
 import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppGenerateReqVo;
+import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppInfoAdminResVo;
 import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppInfoCommonResVo;
 import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppQueryReqVo;
+import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoAdminResVo;
+import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoCommonResVo;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
 import com.ezhixuan.codeCraftAi_backend.mapper.SysAppMapper;
 import com.ezhixuan.codeCraftAi_backend.service.SysAppService;
+import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
@@ -31,30 +39,51 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp>  implem
     }
 
     @Override
-    public Page<AppInfoCommonResVo> getList(AppQueryReqVo queryReqVo) {
-        QueryWrapper wrapper = getQueryWrapper(queryReqVo);
+    public Page<SysApp> getList(AppQueryReqVo queryReqVo, boolean limit) {
+        return page(queryReqVo.toPage(), getQueryWrapper(queryReqVo, limit));
     }
 
-    private QueryWrapper getQueryWrapper(AppQueryReqVo queryReqVo) {
-        String ASC = PageRequest.ASC;
-        Integer PAGE_SIZE_NONE = PageRequest.PAGE_SIZE_NONE;
-        Long id = queryReqVo.getId();
-        String name = queryReqVo.getName();
-        String codeGenType = queryReqVo.getCodeGenType();
-        String deployKey = queryReqVo.getDeployKey();
-        LocalDateTime deployTime = queryReqVo.getDeployTime();
-        Integer priority = queryReqVo.getPriority();
-        Long userId = queryReqVo.getUserId();
-        LocalDateTime createTime = queryReqVo.getCreateTime();
-        LocalDateTime updateTime = queryReqVo.getUpdateTime();
-        Integer pageNo = queryReqVo.getPageNo();
-        Integer pageSize = queryReqVo.getPageSize();
-        String orderBy = queryReqVo.getOrderBy();
+    @Override
+    public Page<AppInfoCommonResVo> convert2Common(Page<SysApp> sysAppPage, Map<Long, UserInfoCommonResVo> userInfoMap) {
+        if (isNull(sysAppPage) || isEmpty(sysAppPage.getRecords())) {
+            return new Page<>();
+        }
+        return PageRequest.convert(sysAppPage, sysApp -> {
+            AppInfoCommonResVo appInfoCommonResVo = new AppInfoCommonResVo();
+            appInfoCommonResVo.build(sysApp, userInfoMap.get(sysApp.getUserId()));
+            return appInfoCommonResVo;
+        });
+    }
 
+    @Override
+    public Page<AppInfoAdminResVo> convert2Admin(Page<SysApp> sysAppPage, Map<Long, UserInfoAdminResVo> userInfoMap) {
+        if (isNull(sysAppPage) || isEmpty(sysAppPage.getRecords())) {
+            return new Page<>();
+        }
+        return PageRequest.convert(sysAppPage, sysApp -> {
+            AppInfoAdminResVo appInfoAdminResVo = new AppInfoAdminResVo();
+            appInfoAdminResVo.build(sysApp, userInfoMap.get(sysApp.getUserId()));
+            return appInfoAdminResVo;
+        });
+    }
+
+    private QueryWrapper getQueryWrapper(AppQueryReqVo queryReqVo, boolean limit) {
         QueryWrapper wrapper = QueryWrapper.create();
+
+        if (limit) {
+            wrapper.eq(SysApp::getUserId, UserUtil.getLoginUserId());
+        } else {
+            wrapper.eq(SysApp::getUserId, queryReqVo.getUserId());
+        }
+
         wrapper.eq(SysApp::getId, queryReqVo.getId());
         wrapper.like(SysApp::getName, queryReqVo.getName());
         wrapper.eq(SysApp::getCodeGenType, queryReqVo.getCodeGenType());
-        if ()
+        wrapper.eq(SysApp::getDeployKey, queryReqVo.getDeployKey());
+        wrapper.le(SysApp::getPriority, queryReqVo.getPriority());
+        wrapper.ge(SysApp::getUpdateTime, queryReqVo.getStartTime());
+        wrapper.le(SysApp::getUpdateTime, queryReqVo.getEndTime());
+        wrapper.orderBy(SysApp::getPriority, Objects.equals(queryReqVo.getOrderBy(), PageRequest.ASC));
+        return wrapper;
     }
 }

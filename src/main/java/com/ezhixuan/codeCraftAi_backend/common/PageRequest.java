@@ -1,6 +1,7 @@
 package com.ezhixuan.codeCraftAi_backend.common;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 import com.mybatisflex.core.paginate.Page;
 
@@ -43,5 +44,9 @@ public class PageRequest {
 
     public static <T, R> Page<R> convert(Page<T> tPage, Class<R> rClass) {
         return tPage.map(t -> BeanUtil.copyProperties(t, rClass));
+    }
+
+    public static <T, R> Page<R> convert(Page<T> tPage, Function<T, R> mapper) {
+        return tPage.map(mapper);
     }
 }
