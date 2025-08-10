@@ -53,7 +53,7 @@ public class AppController {
 
     @Operation(summary = "获取用户应用列表")
     @GetMapping("/list")
-    public PageResponse<AppInfoCommonResVo> getList(@RequestBody AppQueryReqVo queryReqVo) {
+    public PageResponse<AppInfoCommonResVo> getList(@Valid AppQueryReqVo queryReqVo) {
         Page<SysApp> sysAppPage = appService.getList(queryReqVo, true);
         Set<Long> userIds = sysAppPage.getRecords().stream().map(SysApp::getUserId).collect(Collectors.toSet());
         return R.list(appService.convert2Common(sysAppPage, userService.getUserInfoCommonMap(userIds)));

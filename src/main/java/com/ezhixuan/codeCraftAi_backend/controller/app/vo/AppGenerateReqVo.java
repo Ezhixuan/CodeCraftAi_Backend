@@ -8,6 +8,7 @@ import com.ezhixuan.codeCraftAi_backend.domain.constant.AppConstant;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
 import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 
+import cn.hutool.core.util.IdUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -32,6 +33,7 @@ public class AppGenerateReqVo extends AppConverter implements Serializable {
         entity.setPriority(AppConstant.BASE_PRIORITY);
         entity.setUserId(UserUtil.getLoginUserId());
         entity.setCodeGenType(CodeGenTypeEnum.HTML_MULTI_FILE.getValue());
+        entity.setDeployKey(IdUtil.getSnowflakeNextIdStr());
         return entity;
     }
 }

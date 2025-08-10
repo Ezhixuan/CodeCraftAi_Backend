@@ -48,7 +48,7 @@ public class AdminAppController {
     @Operation(summary = "获取用户应用列表")
     @AuthRole
     @GetMapping("/list")
-    public PageResponse<AppInfoAdminResVo> adminGetList(@RequestBody AppQueryReqVo queryReqVo) {
+    public PageResponse<AppInfoAdminResVo> adminGetList(@Valid AppQueryReqVo queryReqVo) {
         Page<SysApp> sysAppPage = appService.getList(queryReqVo, false);
         Set<Long> userIds = sysAppPage.getRecords().stream().map(SysApp::getUserId).collect(Collectors.toSet());
         return R.list(appService.convert2Admin(sysAppPage, userService.getUserInfoAdminMap(userIds)));
