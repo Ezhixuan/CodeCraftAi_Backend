@@ -69,4 +69,13 @@ public class UserUtil {
     public String getEncryptedPassword(String password){
         return DigestUtils.md5DigestAsHex((SALT + password).getBytes());
     }
+
+    public boolean isAdmin() {
+        try {
+            SysUser loginUserInfo = getLoginUserInfo();
+            return UserConstant.ADMIN_ROLE.equals(loginUserInfo.getRole());
+        }catch (Exception e) {
+            return false;
+        }
+    }
 }
