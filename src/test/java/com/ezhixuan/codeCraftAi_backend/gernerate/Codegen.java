@@ -11,7 +11,7 @@ import cn.hutool.setting.yaml.YamlUtil;
 
 public class Codegen {
 
-    public static final String[] TABLE_NAMES = {"sys_user"};
+    public static final String[] TABLE_NAMES = {"sys_app"};
 
     public static void main(String[] args) {
         // 加载数据
@@ -41,7 +41,7 @@ public class Codegen {
         GlobalConfig globalConfig = new GlobalConfig();
 
         // 设置根包
-        globalConfig.getPackageConfig().setBasePackage("com.ezhixuan.common.common_backend.gernerate.res");
+        globalConfig.getPackageConfig().setBasePackage("com.ezhixuan.codeCraftAi_backend.gernerate.res");
 
         // 设置表前缀和只生成哪些表，setGenerateTable 未配置时，生成所有表
         globalConfig.getStrategyConfig().setGenerateTable(TABLE_NAMES).setLogicDeleteColumn("deleted");
