@@ -1,14 +1,14 @@
 package com.ezhixuan.codeCraftAi_backend.core.saver;
 
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.IdUtil;
-import cn.hutool.core.util.StrUtil;
+import java.io.File;
+import java.util.Objects;
+
 import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
 
-import java.io.File;
-import java.util.Objects;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.util.StrUtil;
 
 public abstract class FileSaverTemplate<T> {
 
@@ -20,10 +20,13 @@ public abstract class FileSaverTemplate<T> {
      * @param resDto ai响应结果
      * @return File
      */
-    public final File save(T resDto) {
-        validate(resDto);
-        String baseDirPath = getBasePath(getCodeType());
-        doSave(resDto, baseDirPath);
+    public final File save(FileSaverDto saverDto) {
+        T aiChatDto = (T) saverDto.getAiChatDto();
+        Long appId = saverDto.getAppId();
+
+        validate(aiChatDto);
+        String baseDirPath = getBasePath(getCodeType(), appId);
+        doSave(aiChatDto, baseDirPath);
         return FileUtil.file(baseDirPath);
     }
 
@@ -44,8 +47,8 @@ public abstract class FileSaverTemplate<T> {
      * @param codeType 代码类型
      * @return java.lang.String
      */
-    private String getBasePath(CodeGenTypeEnum codeType) {
-        String dirName = StrUtil.format("{}_{}", codeType.getValue(), IdUtil.getSnowflakeNextId());
+    private String getBasePath(CodeGenTypeEnum codeType, Long appId) {
+        String dirName = StrUtil.format("{}_{}", codeType.getValue(), appId);
         String path = TEMP_DIR + File.separator + dirName;
         FileUtil.mkdir(path);
         return path;

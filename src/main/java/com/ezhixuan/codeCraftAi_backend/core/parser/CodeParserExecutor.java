@@ -1,4 +1,4 @@
-package com.ezhixuan.codeCraftAi_backend.core.parse;
+package com.ezhixuan.codeCraftAi_backend.core.parser;
 
 import com.ezhixuan.codeCraftAi_backend.ai.model.AiChatHtmlCssScriptResDto;
 import com.ezhixuan.codeCraftAi_backend.ai.model.AiChatHtmlResDto;

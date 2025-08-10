@@ -1,4 +1,4 @@
-package com.ezhixuan.codeCraftAi_backend.core.parse;
+package com.ezhixuan.codeCraftAi_backend.core.parser;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

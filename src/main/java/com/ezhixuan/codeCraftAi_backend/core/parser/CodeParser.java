@@ -1,4 +1,4 @@
-package com.ezhixuan.codeCraftAi_backend.core.parse;
+package com.ezhixuan.codeCraftAi_backend.core.parser;
 
 import lombok.extern.slf4j.Slf4j;
 
