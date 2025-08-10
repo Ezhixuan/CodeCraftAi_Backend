@@ -6,8 +6,10 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 import java.util.Map;
 import java.util.Objects;
 
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 
+import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
 import com.ezhixuan.codeCraftAi_backend.common.PageRequest;
 import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppGenerateReqVo;
 import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppInfoAdminResVo;
@@ -15,13 +17,21 @@ import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppInfoCommonResVo;
 import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppQueryReqVo;
 import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoAdminResVo;
 import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoCommonResVo;
+import com.ezhixuan.codeCraftAi_backend.core.CodeCraftFacade;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
+import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
+import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
 import com.ezhixuan.codeCraftAi_backend.mapper.SysAppMapper;
 import com.ezhixuan.codeCraftAi_backend.service.SysAppService;
 import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
+
+import cn.hutool.json.JSONUtil;
+import jakarta.annotation.Resource;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  *  服务层实现。
@@ -30,6 +40,34 @@ import com.mybatisflex.spring.service.impl.ServiceImpl;
  */
 @Service
 public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp>  implements SysAppService{
+
+    @Resource
+    private CodeCraftFacade codeCraftFacade;
+
+    @Override
+    public Flux<ServerSentEvent<String>> generateCode(String message, Long appId) {
+        SysApp sysApp = getById(appId);
+        if (isNull(sysApp)) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        if (!UserUtil.isMe(sysApp.getUserId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        return codeCraftFacade.chatAndSaveStream(message, CodeGenTypeEnum.getEnumByValue(sysApp.getCodeGenType()), appId)
+                .map(chunk -> {
+                    Map<String, String> d = Map.of("d", chunk);
+                    String jsonStr = JSONUtil.toJsonStr(d);
+                    return ServerSentEvent.<String>builder()
+                            .data(jsonStr)
+                            .build();
+                })
+                .concatWith(Mono.just(
+                        ServerSentEvent.<String>builder()
+                                .event("done")
+                                .data("")
+                                .build()
+                ));
+    }
 
     @Override
     public Long doGenerate(AppGenerateReqVo reqVo) {

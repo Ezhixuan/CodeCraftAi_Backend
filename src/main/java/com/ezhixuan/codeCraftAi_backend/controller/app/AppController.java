@@ -3,6 +3,8 @@ package com.ezhixuan.codeCraftAi_backend.controller.app;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,7 +26,11 @@ import com.mybatisflex.core.paginate.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/app")
@@ -35,6 +41,13 @@ public class AppController {
 
     private final SysAppService appService;
     private final SysUserService userService;
+
+    @Operation(summary = "代码生成")
+    @GetMapping(value = "/generate/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ServerSentEvent<String>> generateCode(@RequestParam("message") @NotBlank String message,
+                                                      @RequestParam("appId") @NotNull @Min(1) Long appId) {
+        return appService.generateCode(message, appId);
+    }
 
     @Operation(summary = "通过用户输入生成应用记录")
     @PostMapping("/generate")

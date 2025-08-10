@@ -2,6 +2,8 @@ package com.ezhixuan.codeCraftAi_backend.service;
 
 import java.util.Map;
 
+import org.springframework.http.codec.ServerSentEvent;
+
 import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppGenerateReqVo;
 import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppInfoAdminResVo;
 import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppInfoCommonResVo;
@@ -12,12 +14,23 @@ import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
 
+import reactor.core.publisher.Flux;
+
 /**
  *  服务层。
  *
  * @author Ezhixuan
  */
 public interface SysAppService extends IService<SysApp> {
+
+    /**
+     * 代码生成
+     * @author Ezhixuan
+     * @param message 用户输入
+     * @param appId 应用id
+     * @return Flux<ServerSentEvent < String>> sse流式返回
+     */
+    Flux<ServerSentEvent<String>> generateCode(String message, Long appId);
 
     /**
      * 通过用户输入内容生成记录
