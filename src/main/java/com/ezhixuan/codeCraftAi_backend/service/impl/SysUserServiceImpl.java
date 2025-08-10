@@ -4,14 +4,13 @@ import static com.ezhixuan.codeCraftAi_backend.domain.enums.UserRoleEnum.ADMIN;
 import static com.ezhixuan.codeCraftAi_backend.domain.enums.UserRoleEnum.getByRole;
 import static com.ezhixuan.codeCraftAi_backend.utils.UserUtil.*;
 import static java.util.Objects.isNull;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import com.ezhixuan.codeCraftAi_backend.common.PageRequest;
 import com.ezhixuan.codeCraftAi_backend.config.prop.SystemProp;
@@ -122,7 +121,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public List<UserAddResVo> saveBatch(List<UserAddReqVo> waitAddList) {
-        if (CollectionUtils.isEmpty(waitAddList)) {
+        if (isEmpty(waitAddList)) {
             return Collections.emptyList();
         }
         List<SysUser> list = waitAddList.stream().map(add -> add.toUser(prop.getDefaultPassword())).toList();
@@ -164,6 +163,26 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Override
     public Page<UserInfoAdminResVo> getList(UserQueryReqVo queryReqVo) {
         return PageRequest.convert(page(queryReqVo.toPage(), getQueryWrapper(queryReqVo)), UserInfoAdminResVo.class);
+    }
+
+    @Override
+    public Map<Long, UserInfoCommonResVo> getUserInfoCommonMap(Collection<Long> userIdList) {
+        if (isEmpty(userIdList)) {
+            return Collections.emptyMap();
+        }
+        List<SysUser> userList = listByIds(userIdList);
+        return userList.stream().map(this::getUserVo)
+            .collect(Collectors.toMap(UserInfoCommonResVo::getId, Function.identity()));
+    }
+
+    @Override
+    public Map<Long, UserInfoAdminResVo> getUserInfoAdminMap(Collection<Long> userIdList) {
+        if (isEmpty(userIdList)) {
+            return Collections.emptyMap();
+        }
+        List<SysUser> userList = listByIds(userIdList);
+        return userList.stream().map(user -> BeanUtil.copyProperties(user, UserInfoAdminResVo.class))
+            .collect(Collectors.toMap(UserInfoAdminResVo::getId, Function.identity()));
     }
 
     /**
