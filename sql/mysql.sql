@@ -29,3 +29,29 @@ CREATE TABLE `sys_user`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Table structure for sys_app
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_app`;
+CREATE TABLE `sys_app`
+(
+    `id`            bigint                                  NOT NULL AUTO_INCREMENT COMMENT '主键 id',
+    `name`          varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '应用名称',
+    `cover`         varchar(255) COLLATE utf8mb4_unicode_ci          DEFAULT NULL COMMENT '应用封面',
+    `init_prompt`   text COLLATE utf8mb4_unicode_ci         NOT NULL COMMENT '初始化提示词',
+    `code_gen_type` varchar(64) COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '生成类型枚举',
+    `deploy_key`    varchar(64) COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '部署标识',
+    `deploy_time`   datetime                                         DEFAULT NULL COMMENT '部署时间',
+    `priority`      int                                     NOT NULL DEFAULT '0' COMMENT '展示优先级',
+    `user_id`       bigint                                  NOT NULL COMMENT '所属用户 id',
+    `create_time`   datetime                                NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`   datetime                                NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted`       tinyint                                 NOT NULL DEFAULT '0' COMMENT '是否删除：0-未删除，1-已删除',
+    PRIMARY KEY (`id`, `name`, `user_id`),
+    UNIQUE KEY `uq-deploy` (`deploy_key`) USING BTREE COMMENT '部署标识唯一',
+    KEY `idx-name` (`name`) USING BTREE COMMENT '应用名称索引',
+    KEY `idx-userId` (`user_id`) USING BTREE COMMENT '用户 id 索引'
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci;
