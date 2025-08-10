@@ -11,6 +11,7 @@ import com.ezhixuan.codeCraftAi_backend.common.BaseResponse;
 import com.ezhixuan.codeCraftAi_backend.common.PageResponse;
 import com.ezhixuan.codeCraftAi_backend.common.R;
 import com.ezhixuan.codeCraftAi_backend.controller.app.vo.*;
+import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoAdminResVo;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
@@ -19,6 +20,7 @@ import com.ezhixuan.codeCraftAi_backend.service.SysUserService;
 import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import com.mybatisflex.core.paginate.Page;
 
+import cn.hutool.core.bean.BeanUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -85,5 +87,23 @@ public class AppController {
         }
         appService.removeById(id);
         return R.success();
+    }
+
+    @Operation(summary = "获取应用详情 (用户)")
+    @GetMapping("/{id}")
+    public BaseResponse<AppInfoCommonResVo> getInfo(@PathVariable Long id) {
+        SysApp sysApp = appService.getById(id);
+        AppInfoCommonResVo appInfoCommonResVo = new AppInfoCommonResVo();
+        appInfoCommonResVo.build(sysApp, userService.getUserVo(sysApp.getId()));
+        return R.success(appInfoCommonResVo);
+    }
+
+    @Operation(summary = "获取应用详情 (管理员)")
+    @GetMapping("/admin/{id}")
+    public BaseResponse<AppInfoAdminResVo> adminGetInfo(@PathVariable Long id) {
+        SysApp sysApp = appService.getById(id);
+        AppInfoAdminResVo appInfoAdminResVo = new AppInfoAdminResVo();
+        appInfoAdminResVo.build(sysApp, BeanUtil.copyProperties(userService.getById(id), UserInfoAdminResVo.class));
+        return R.success(appInfoAdminResVo);
     }
 }
