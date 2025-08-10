@@ -1,8 +1,5 @@
 package com.ezhixuan.codeCraftAi_backend.controller.app;
 
-import static com.ezhixuan.codeCraftAi_backend.utils.UserUtil.getLoginUserId;
-
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -63,6 +60,9 @@ public class AppController {
     @Operation(summary = "更新应用信息(用户)")
     @PostMapping("/update")
     public BaseResponse<Void> update(@RequestBody @Valid AppUpdateCommonReqVo updateReqVo) {
+        if (!UserUtil.isMe(updateReqVo.getId())) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
         SysApp entity = updateReqVo.toEntity();
         appService.updateById(entity);
         return R.success();
@@ -80,10 +80,8 @@ public class AppController {
     @Operation(summary = "删除应用")
     @DeleteMapping("/{id}")
     public BaseResponse<Void> delete(@PathVariable Long id) {
-        if (!UserUtil.isAdmin()) {
-            if (!Objects.equals(getLoginUserId(), id)) {
-                throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-            }
+        if (!UserUtil.isMe(id)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         appService.removeById(id);
         return R.success();
