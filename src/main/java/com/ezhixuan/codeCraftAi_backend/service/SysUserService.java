@@ -1,6 +1,8 @@
 package com.ezhixuan.codeCraftAi_backend.service;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import com.ezhixuan.codeCraftAi_backend.controller.user.vo.*;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysUser;
@@ -94,4 +96,20 @@ public interface SysUserService extends IService<SysUser> {
      * @return Page<SysUser> 用户信息
      */
     Page<UserInfoAdminResVo> getList(UserQueryReqVo queryReqVo);
+
+    /**
+     * 根据用户 id 获取用户 common 信息Map
+     * @author Ezhixuan
+     * @param userIdList 用户 id 列表
+     * @return Map<Long, UserInfoCommonResVo> 用户信息
+     */
+    Map<Long, UserInfoCommonResVo> getUserInfoCommonMap(Collection<Long> userIdList);
+
+    /**
+     * 根据用户 id 获取用户 admin 信息Map
+     * @author Ezhixuan
+     * @param userIdList 用户 id 列表
+     * @return Map<Long, UserInfoAdminResVo> 用户信息
+     */
+    Map<Long, UserInfoAdminResVo> getUserInfoAdminMap(Collection<Long> userIdList);
 }
