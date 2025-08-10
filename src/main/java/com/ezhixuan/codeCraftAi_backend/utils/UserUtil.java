@@ -2,6 +2,8 @@ package com.ezhixuan.codeCraftAi_backend.utils;
 
 import static java.util.Objects.isNull;
 
+import java.util.Objects;
+
 import org.springframework.util.DigestUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -70,11 +72,32 @@ public class UserUtil {
         return DigestUtils.md5DigestAsHex((SALT + password).getBytes());
     }
 
+    /**
+     * 判断当前用户是否为管理员
+     *
+     * @author Ezhixuan
+     * @return boolean true-管理员 false-非管理员
+     */
     public boolean isAdmin() {
         try {
             SysUser loginUserInfo = getLoginUserInfo();
             return UserConstant.ADMIN_ROLE.equals(loginUserInfo.getRole());
         }catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * 判断操作者是否为本人
+     *
+     * @author Ezhixuan
+     * @param operateId 操作者id
+     * @return boolean true-本人 false-非本人
+     */
+    public boolean isMe(Long operateId) {
+        try {
+            return Objects.equals(operateId, getLoginUserId());
+        } catch (Exception e) {
             return false;
         }
     }
