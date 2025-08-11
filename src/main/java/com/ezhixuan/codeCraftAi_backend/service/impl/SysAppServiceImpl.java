@@ -124,4 +124,11 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp>  implem
         wrapper.orderBy(SysApp::getPriority, Objects.equals(queryReqVo.getOrderBy(), PageRequest.ASC));
         return wrapper;
     }
+
+    @Override
+    public SysApp getByDeployKey(String deployKey) {
+        QueryWrapper wrapper = QueryWrapper.create()
+                .eq(SysApp::getDeployKey, deployKey);
+        return getOne(wrapper);
+    }
 }

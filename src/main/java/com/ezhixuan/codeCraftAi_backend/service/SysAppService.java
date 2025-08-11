@@ -66,4 +66,12 @@ public interface SysAppService extends IService<SysApp> {
      * @return Page<AppInfoAdminResVo> admin 返回
      */
     Page<AppInfoAdminResVo> convert2Admin(Page<SysApp> sysAppPage, Map<Long, UserInfoAdminResVo> userInfoMap);
+
+    /**
+     * 通过部署标识获取应用
+     * @author Ezhixuan
+     * @param deployKey 部署标识
+     * @return SysApp 应用信息
+     */
+    SysApp getByDeployKey(String deployKey);
 }

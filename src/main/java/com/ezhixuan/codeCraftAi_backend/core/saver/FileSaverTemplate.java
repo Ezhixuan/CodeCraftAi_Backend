@@ -6,9 +6,9 @@ import java.util.Objects;
 import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
+import com.ezhixuan.codeCraftAi_backend.utils.PathUtil;
 
 import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.util.StrUtil;
 
 public abstract class FileSaverTemplate<T> {
 
@@ -25,7 +25,7 @@ public abstract class FileSaverTemplate<T> {
         Long appId = saverDto.getAppId();
 
         validate(aiChatDto);
-        String baseDirPath = getBasePath(getCodeType(), appId);
+        String baseDirPath = PathUtil.buildPath(PathUtil.TEMP_DIR, getCodeType(), appId);
         doSave(aiChatDto, baseDirPath);
         return FileUtil.file(baseDirPath);
     }
@@ -38,19 +38,5 @@ public abstract class FileSaverTemplate<T> {
         if (Objects.isNull(resDto)) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "未接收到结果");
         }
-    }
-
-    /**
-     * 获取基础路径
-     *
-     * @author Ezhixuan
-     * @param codeType 代码类型
-     * @return java.lang.String
-     */
-    private String getBasePath(CodeGenTypeEnum codeType, Long appId) {
-        String dirName = StrUtil.format("{}_{}", codeType.getValue(), appId);
-        String path = TEMP_DIR + File.separator + dirName;
-        FileUtil.mkdir(path);
-        return path;
     }
 }
