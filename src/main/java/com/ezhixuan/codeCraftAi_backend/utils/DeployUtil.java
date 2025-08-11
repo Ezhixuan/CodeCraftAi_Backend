@@ -6,9 +6,7 @@ import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
 
 import cn.hutool.core.util.IdUtil;
-import lombok.experimental.UtilityClass;
 
-@UtilityClass
 public class DeployUtil {
 
     /**
@@ -16,7 +14,7 @@ public class DeployUtil {
      * @author Ezhixuan
      * @return String 密钥
      */
-    public String initDeployKey() {
+    public static String initDeployKey() {
         return IdUtil.getSnowflakeNextIdStr() + "-" + 0;
     }
 
@@ -26,7 +24,7 @@ public class DeployUtil {
      * @param deployKey 密钥
      * @return boolean 是否合规
      */
-    public boolean checkDeployKey(String deployKey) {
+    public static boolean checkDeployKey(String deployKey) {
         if (!hasText(deployKey)) {
             return true;
         }
@@ -53,7 +51,7 @@ public class DeployUtil {
      * @param deployKey 密钥
      * @return int
      */
-    public int getVersion(String deployKey) {
+    public static int getVersion(String deployKey) {
         String[] split = deployKey.split("-");
         if (split.length != 2) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "部署密钥格式错误");
@@ -67,7 +65,7 @@ public class DeployUtil {
      * @param deployKey 密钥
      * @return String 更新后的密钥
      */
-    public String newVersion(String deployKey) {
+    public static String newVersion(String deployKey) {
         int version = getVersion(deployKey);
         return deployKey.split("-")[0] + "-" + (version + 1);
     }
