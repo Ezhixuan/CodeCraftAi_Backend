@@ -14,12 +14,10 @@ import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.experimental.UtilityClass;
 
-@UtilityClass
 public class UserUtil {
 
-    public String SALT = "xuanAi";
+    public static String SALT = "xuanAi";
 
     /**
      * 获取当前登录用户 id,如果不存在抛出 NOT_LOGIN
@@ -27,7 +25,7 @@ public class UserUtil {
      * @param request 请求
      * @return Long 当前登录用户 id
      */
-    public Long getLoginUserId(HttpServletRequest request) {
+    public static Long getLoginUserId(HttpServletRequest request) {
         SysUser loginUserInfo = getLoginUserInfo(request);
         Long id = loginUserInfo.getId();
         if (isNull(id)) {
@@ -36,7 +34,7 @@ public class UserUtil {
         return id;
     }
 
-    public Long getLoginUserId() {
+    public static Long getLoginUserId() {
         return getLoginUserId(getRequest());
     }
 
@@ -46,7 +44,7 @@ public class UserUtil {
      * @param request 请求
      * @return SysUser 当前登录用户信息
      */
-    public SysUser getLoginUserInfo(HttpServletRequest request) {
+    public static SysUser getLoginUserInfo(HttpServletRequest request) {
         Object userObj = request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
         if (isNull(userObj)) {
             throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
@@ -54,11 +52,11 @@ public class UserUtil {
         return (SysUser)userObj;
     }
 
-    public SysUser getLoginUserInfo() {
+    public static SysUser getLoginUserInfo() {
         return getLoginUserInfo(getRequest());
     }
 
-    public HttpServletRequest getRequest() {
+    public static HttpServletRequest getRequest() {
         return ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
     }
 
@@ -68,7 +66,7 @@ public class UserUtil {
      * @param password 原密码
      * @return String 加密后的密码
      */
-    public String getEncryptedPassword(String password){
+    public static String getEncryptedPassword(String password) {
         return DigestUtils.md5DigestAsHex((SALT + password).getBytes());
     }
 
@@ -78,7 +76,7 @@ public class UserUtil {
      * @author Ezhixuan
      * @return boolean true-管理员 false-非管理员
      */
-    public boolean isAdmin() {
+    public static boolean isAdmin() {
         try {
             SysUser loginUserInfo = getLoginUserInfo();
             return UserConstant.ADMIN_ROLE.equals(loginUserInfo.getRole());
@@ -94,7 +92,7 @@ public class UserUtil {
      * @param operateId 操作者id
      * @return boolean true-本人 false-非本人
      */
-    public boolean isMe(Long operateId) {
+    public static boolean isMe(Long operateId) {
         try {
             return Objects.equals(operateId, getLoginUserId());
         } catch (Exception e) {
