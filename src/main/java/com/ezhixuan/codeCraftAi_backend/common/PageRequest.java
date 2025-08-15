@@ -1,16 +1,15 @@
 package com.ezhixuan.codeCraftAi_backend.common;
 
-import java.util.Objects;
-import java.util.function.Function;
-
-import com.mybatisflex.core.paginate.Page;
-
 import cn.hutool.core.bean.BeanUtil;
+import com.mybatisflex.core.paginate.Page;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+
+import java.util.Objects;
+import java.util.function.Function;
 
 @Data
 public class PageRequest {
@@ -19,6 +18,7 @@ public class PageRequest {
     private static final Integer PAGE_SIZE = 10;
 
     public static final String ASC = "asc";
+    public static final String DESC = "desc";
     public static final Integer PAGE_SIZE_NONE = -1;
 
     @Schema(description = "页码，从 1 开始")

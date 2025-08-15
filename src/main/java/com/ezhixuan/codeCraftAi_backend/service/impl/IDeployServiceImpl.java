@@ -1,14 +1,6 @@
 package com.ezhixuan.codeCraftAi_backend.service.impl;
 
-import static cn.hutool.core.io.FileUtil.copyFilesFromDir;
-import static cn.hutool.core.io.FileUtil.file;
-import static java.util.Objects.isNull;
-
-import java.io.File;
-import java.time.LocalDateTime;
-
-import org.springframework.stereotype.Service;
-
+import cn.hutool.core.io.FileUtil;
 import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
 import com.ezhixuan.codeCraftAi_backend.controller.deploy.vo.DeployStatusVo;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
@@ -19,12 +11,18 @@ import com.ezhixuan.codeCraftAi_backend.service.SysAppService;
 import com.ezhixuan.codeCraftAi_backend.utils.DeployUtil;
 import com.ezhixuan.codeCraftAi_backend.utils.PathUtil;
 import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
-
-import cn.hutool.core.io.FileUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.time.LocalDateTime;
+
+import static cn.hutool.core.io.FileUtil.copyFilesFromDir;
+import static cn.hutool.core.io.FileUtil.file;
+import static java.util.Objects.isNull;
 
 @Service
 @Slf4j
@@ -90,7 +88,7 @@ public class IDeployServiceImpl implements IDeployService {
 
             // 检查部署文件是否存在
             if (sysApp.getDeployKey() != null) {
-                String deployPath = PathUtil.buildPath(PathUtil.DEPLOY_DIR, codeGenTypeEnum, Long.valueOf(sysApp.getDeployKey()));
+                String deployPath = PathUtil.buildPath(PathUtil.DEPLOY_DIR, codeGenTypeEnum, sysApp.getDeployKey());
                 File deployFile = FileUtil.file(deployPath);
                 statusVo.setDeployFileExists(deployFile.exists() && deployFile.listFiles() != null && deployFile.listFiles().length > 0);
                 statusVo.setPreDeployKey(deployPath.substring(deployPath.lastIndexOf("/") + 1));

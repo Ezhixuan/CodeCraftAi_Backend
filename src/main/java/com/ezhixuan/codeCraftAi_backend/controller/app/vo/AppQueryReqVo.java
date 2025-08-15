@@ -1,14 +1,13 @@
 package com.ezhixuan.codeCraftAi_backend.controller.app.vo;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 import com.ezhixuan.codeCraftAi_backend.common.PageRequest;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -43,4 +42,7 @@ public class AppQueryReqVo extends PageRequest implements Serializable {
 
     @Schema(description = "结束时间")
     private LocalDateTime endTime;
+
+    @Schema(description = "最大 id")
+    private Long maxId;
 }

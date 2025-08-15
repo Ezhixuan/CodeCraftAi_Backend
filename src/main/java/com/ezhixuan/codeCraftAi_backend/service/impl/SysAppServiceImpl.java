@@ -1,14 +1,6 @@
 package com.ezhixuan.codeCraftAi_backend.service.impl;
 
-import static java.util.Objects.isNull;
-import static org.springframework.util.CollectionUtils.isEmpty;
-
-import java.util.Map;
-import java.util.Objects;
-
-import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.stereotype.Service;
-
+import cn.hutool.json.JSONUtil;
 import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
 import com.ezhixuan.codeCraftAi_backend.common.PageRequest;
 import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppGenerateReqVo;
@@ -27,11 +19,17 @@ import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
-
-import cn.hutool.json.JSONUtil;
 import jakarta.annotation.Resource;
+import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
+import java.util.Objects;
+
+import static java.util.Objects.isNull;
+import static org.springframework.util.CollectionUtils.isEmpty;
 
 /**
  *  服务层实现。
@@ -121,7 +119,9 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp>  implem
         wrapper.ge(SysApp::getPriority, queryReqVo.getPriority());
         wrapper.ge(SysApp::getUpdateTime, queryReqVo.getStartTime());
         wrapper.le(SysApp::getUpdateTime, queryReqVo.getEndTime());
+        wrapper.lt(SysApp::getId, queryReqVo.getMaxId());
         wrapper.orderBy(SysApp::getPriority, Objects.equals(queryReqVo.getOrderBy(), PageRequest.ASC));
+        wrapper.orderBy(SysApp::getUpdateTime, Objects.equals(queryReqVo.getOrderBy(), PageRequest.DESC));
         return wrapper;
     }
 
