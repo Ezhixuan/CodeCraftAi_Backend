@@ -1,23 +1,21 @@
 package com.ezhixuan.codeCraftAi_backend.controller.user;
 
-import java.util.List;
-
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
+import cn.hutool.core.bean.BeanUtil;
 import com.ezhixuan.codeCraftAi_backend.annotation.AuthRole;
 import com.ezhixuan.codeCraftAi_backend.common.BaseResponse;
 import com.ezhixuan.codeCraftAi_backend.common.PageResponse;
 import com.ezhixuan.codeCraftAi_backend.common.R;
 import com.ezhixuan.codeCraftAi_backend.controller.user.vo.*;
 import com.ezhixuan.codeCraftAi_backend.service.SysUserService;
-
-import cn.hutool.core.bean.BeanUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RequestMapping("/user")
 @RestController
@@ -44,6 +42,12 @@ public class UserController {
     @GetMapping
     public BaseResponse<UserInfoCommonResVo> getUserInfo(HttpServletRequest request) {
         return R.success(userService.getUserVo(request));
+    }
+
+    @Operation(summary = "通过 id 获取用户信息")
+    @GetMapping("/{id}")
+    public BaseResponse<UserInfoCommonResVo> getUserInfoById(@PathVariable Long id) {
+        return R.success(userService.getUserVo(id));
     }
 
     @Operation(summary = "退出登录")
