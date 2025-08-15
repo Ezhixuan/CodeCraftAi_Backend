@@ -18,7 +18,7 @@ public class DeployStatusVo implements Serializable {
     private Long appId;
 
     @Schema(description = "部署标识")
-    private String deployKey;
+    private String preDeployKey;
 
     @Schema(description = "部署时间")
     private LocalDateTime deployTime;

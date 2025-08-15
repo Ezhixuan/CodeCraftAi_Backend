@@ -1,13 +1,5 @@
 package com.ezhixuan.codeCraftAi_backend.controller.app;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
 import com.ezhixuan.codeCraftAi_backend.common.BaseResponse;
 import com.ezhixuan.codeCraftAi_backend.common.PageResponse;
 import com.ezhixuan.codeCraftAi_backend.common.R;
@@ -22,7 +14,6 @@ import com.ezhixuan.codeCraftAi_backend.service.SysAppService;
 import com.ezhixuan.codeCraftAi_backend.service.SysUserService;
 import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import com.mybatisflex.core.paginate.Page;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -30,7 +21,15 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/app")
@@ -60,7 +59,7 @@ public class AppController {
     public BaseResponse<AppInfoCommonResVo> getInfo(@PathVariable Long id) {
         SysApp sysApp = appService.getById(id);
         AppInfoCommonResVo appInfoCommonResVo = new AppInfoCommonResVo();
-        appInfoCommonResVo.build(sysApp, userService.getUserVo(sysApp.getId()));
+        appInfoCommonResVo.build(sysApp, userService.getUserVo(sysApp.getUserId()));
         return R.success(appInfoCommonResVo);
     }
 
@@ -68,6 +67,18 @@ public class AppController {
     @GetMapping("/list")
     public PageResponse<AppInfoCommonResVo> getList(@Valid AppQueryReqVo queryReqVo) {
         Page<SysApp> sysAppPage = appService.getList(queryReqVo, true);
+        return R.list(appService.convert2Common(sysAppPage,
+            userService.getUserInfoCommonMap(Collections.singletonList(UserUtil.getLoginUserId()))));
+    }
+
+    @Operation(summary = "获取精选应用列表")
+    @GetMapping("/list/featured")
+    public PageResponse<AppInfoCommonResVo> getFeaturedList() {
+        AppQueryReqVo appQueryReqVo = new AppQueryReqVo();
+        appQueryReqVo.setPriority(1);
+        appQueryReqVo.setPageNo(1);
+        appQueryReqVo.setPageSize(30);
+        Page<SysApp> sysAppPage = appService.getList(appQueryReqVo, false);
         Set<Long> userIds = sysAppPage.getRecords().stream().map(SysApp::getUserId).collect(Collectors.toSet());
         return R.list(appService.convert2Common(sysAppPage, userService.getUserInfoCommonMap(userIds)));
     }

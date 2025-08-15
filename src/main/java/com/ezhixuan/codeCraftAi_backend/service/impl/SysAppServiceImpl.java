@@ -118,7 +118,7 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp>  implem
         wrapper.like(SysApp::getName, queryReqVo.getName());
         wrapper.eq(SysApp::getCodeGenType, queryReqVo.getCodeGenType());
         wrapper.eq(SysApp::getDeployKey, queryReqVo.getDeployKey());
-        wrapper.le(SysApp::getPriority, queryReqVo.getPriority());
+        wrapper.ge(SysApp::getPriority, queryReqVo.getPriority());
         wrapper.ge(SysApp::getUpdateTime, queryReqVo.getStartTime());
         wrapper.le(SysApp::getUpdateTime, queryReqVo.getEndTime());
         wrapper.orderBy(SysApp::getPriority, Objects.equals(queryReqVo.getOrderBy(), PageRequest.ASC));

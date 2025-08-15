@@ -79,7 +79,6 @@ public class IDeployServiceImpl implements IDeployService {
 
         DeployStatusVo statusVo = new DeployStatusVo();
         statusVo.setAppId(appId);
-        statusVo.setDeployKey(sysApp.getDeployKey());
         statusVo.setDeployTime(sysApp.getDeployTime());
 
         // 检查临时文件是否存在
@@ -94,6 +93,7 @@ public class IDeployServiceImpl implements IDeployService {
                 String deployPath = PathUtil.buildPath(PathUtil.DEPLOY_DIR, codeGenTypeEnum, Long.valueOf(sysApp.getDeployKey()));
                 File deployFile = FileUtil.file(deployPath);
                 statusVo.setDeployFileExists(deployFile.exists() && deployFile.listFiles() != null && deployFile.listFiles().length > 0);
+                statusVo.setPreDeployKey(deployPath.substring(deployPath.lastIndexOf("/") + 1));
             } else {
                 statusVo.setDeployFileExists(false);
             }
