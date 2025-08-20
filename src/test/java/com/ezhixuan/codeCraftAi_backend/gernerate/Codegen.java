@@ -1,17 +1,16 @@
 package com.ezhixuan.codeCraftAi_backend.gernerate;
 
-import java.util.Map;
-
+import cn.hutool.core.lang.Dict;
+import cn.hutool.setting.yaml.YamlUtil;
 import com.mybatisflex.codegen.Generator;
 import com.mybatisflex.codegen.config.GlobalConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
-import cn.hutool.core.lang.Dict;
-import cn.hutool.setting.yaml.YamlUtil;
+import java.util.Map;
 
 public class Codegen {
 
-    public static final String[] TABLE_NAMES = {"sys_app"};
+    public static final String[] TABLE_NAMES = {"sys_chat_history"};
 
     public static void main(String[] args) {
         // 加载数据

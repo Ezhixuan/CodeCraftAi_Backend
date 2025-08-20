@@ -55,3 +55,25 @@ CREATE TABLE `sys_app`
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4
   COLLATE = utf8mb4_unicode_ci;
+
+-- ----------------------------
+-- Table structure for sys_chat_history
+-- ----------------------------
+DROP TABLE IF EXISTS `sys_chat_history`;
+CREATE TABLE `sys_chat_history`
+(
+    `id`           bigint                                 NOT NULL AUTO_INCREMENT COMMENT 'id',
+    `message`      text COLLATE utf8mb4_unicode_ci        NOT NULL COMMENT '消息',
+    `message_type` varchar(32) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'user/ai',
+    `app_id`       bigint                                 NOT NULL COMMENT '应用id',
+    `user_id`      bigint                                 NOT NULL COMMENT '创建用户id',
+    `create_time`  datetime                               NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`  datetime                               NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted`      tinyint                                NOT NULL DEFAULT '0' COMMENT '是否删除',
+    PRIMARY KEY (`id`),
+    KEY `idx_appId` (`app_id`),
+    KEY `idx_createTime` (`create_time`),
+    KEY `idx_appId_createTime` (`app_id`, `create_time`)
+) ENGINE = InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_unicode_ci COMMENT ='对话历史';
