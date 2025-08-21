@@ -37,3 +37,4 @@ build/
 /src/main/resources/application-dev.yml
 /src/main/resources/application-openAi.yml
 /src/main/resources/application-gemini.yml
+/src/main/resources/application-kimi2.yml
