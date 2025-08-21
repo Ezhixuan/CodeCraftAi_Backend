@@ -10,21 +10,26 @@ import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppQueryReqVo;
 import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoAdminResVo;
 import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoCommonResVo;
 import com.ezhixuan.codeCraftAi_backend.core.CodeCraftFacade;
+import com.ezhixuan.codeCraftAi_backend.domain.dto.sys.chatHistory.SysChatHistorySubmitDto;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
+import com.ezhixuan.codeCraftAi_backend.domain.enums.MessageTypeEnum;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
 import com.ezhixuan.codeCraftAi_backend.mapper.SysAppMapper;
 import com.ezhixuan.codeCraftAi_backend.service.SysAppService;
+import com.ezhixuan.codeCraftAi_backend.service.SysChatHistoryService;
 import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
 
@@ -36,11 +41,14 @@ import static org.springframework.util.CollectionUtils.isEmpty;
  *
  * @author Ezhixuan
  */
+@Slf4j
 @Service
 public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp>  implements SysAppService{
 
     @Resource
     private CodeCraftFacade codeCraftFacade;
+    @Resource
+    private SysChatHistoryService chatHistoryService;
 
     @Override
     public Flux<ServerSentEvent<String>> generateCode(String message, Long appId) {
@@ -51,7 +59,43 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp>  implem
         if (!UserUtil.isMe(sysApp.getUserId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
+        Long userId = UserUtil.getLoginUserId();
+        // 存储用户对话信息
+        chatHistoryService.save(
+                SysChatHistorySubmitDto.builder()
+                        .message(message)
+                        .userId(userId)
+                        .messageTypeEnum(MessageTypeEnum.USER)
+                        .appId(appId)
+                        .build()
+        );
+        StringBuilder contentBuilder = new StringBuilder();
         return codeCraftFacade.chatAndSaveStream(message, CodeGenTypeEnum.getEnumByValue(sysApp.getCodeGenType()), appId)
+                .map(chunk -> {
+                    contentBuilder.append(chunk);
+                    return chunk;
+                })
+                .doOnComplete(() -> {
+                    chatHistoryService.save(
+                            SysChatHistorySubmitDto.builder()
+                                    .message(contentBuilder.toString())
+                                    .userId(userId)
+                                    .messageTypeEnum(MessageTypeEnum.AI)
+                                    .appId(appId)
+                                    .build()
+                    );
+                })
+                .doOnError(error -> {
+                    log.error("解析失败", error);
+                    chatHistoryService.save(
+                            SysChatHistorySubmitDto.builder()
+                                    .message("ai 消息回复失败" + error.getMessage())
+                                    .userId(userId)
+                                    .messageTypeEnum(MessageTypeEnum.AI)
+                                    .appId(appId)
+                                    .build()
+                    );
+                })
                 .map(chunk -> {
                     Map<String, String> d = Map.of("d", chunk);
                     String jsonStr = JSONUtil.toJsonStr(d);
@@ -101,6 +145,26 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp>  implem
             appInfoAdminResVo.build(sysApp, userInfoMap.get(sysApp.getUserId()));
             return appInfoAdminResVo;
         });
+    }
+
+    /**
+     * 重写的删除方法,需要删除对话记录
+     * <p>根据数据主键删除数据。
+     *
+     * @param id 数据主键
+     * @return {@code true} 删除成功，{@code false} 删除失败。
+     */
+    @Override
+    public boolean removeById(Serializable id) {
+        if (isNull(id)) {
+            return false;
+        }
+        try {
+            chatHistoryService.removeByAppId(Long.parseLong(id.toString()));
+        } catch (Exception error) {
+            log.error("历史记录删除失败, appId = {}" , id);
+        }
+        return super.removeById(id);
     }
 
     private QueryWrapper getQueryWrapper(AppQueryReqVo queryReqVo, boolean limit) {

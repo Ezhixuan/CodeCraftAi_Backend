@@ -10,7 +10,6 @@ import com.ezhixuan.codeCraftAi_backend.service.IDeployService;
 import com.ezhixuan.codeCraftAi_backend.service.SysAppService;
 import com.ezhixuan.codeCraftAi_backend.utils.DeployUtil;
 import com.ezhixuan.codeCraftAi_backend.utils.PathUtil;
-import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.SneakyThrows;
@@ -107,10 +106,6 @@ public class IDeployServiceImpl implements IDeployService {
         SysApp sysApp = appService.getById(appId);
         if (sysApp == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "应用不存在");
-        }
-        // 权限校验：只有应用所有者才能查看部署状态
-        if (!UserUtil.isMe(sysApp.getUserId())) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限查看此应用");
         }
         return sysApp;
     }
