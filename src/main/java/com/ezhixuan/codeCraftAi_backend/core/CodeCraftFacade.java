@@ -1,12 +1,7 @@
 package com.ezhixuan.codeCraftAi_backend.core;
 
-import java.io.File;
-import java.util.Objects;
-
-import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
-
 import com.ezhixuan.codeCraftAi_backend.ai.CodeCraftAiChatService;
+import com.ezhixuan.codeCraftAi_backend.ai.CodeCraftAiModelFactory;
 import com.ezhixuan.codeCraftAi_backend.ai.model.AiChatHtmlCssScriptResDto;
 import com.ezhixuan.codeCraftAi_backend.ai.model.AiChatHtmlResDto;
 import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
@@ -14,13 +9,17 @@ import com.ezhixuan.codeCraftAi_backend.core.parser.CodeParserExecutor;
 import com.ezhixuan.codeCraftAi_backend.core.saver.FileSaverExecutor;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
-
 import jakarta.annotation.Resource;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 import reactor.core.publisher.Flux;
+
+import java.io.File;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -28,7 +27,7 @@ import reactor.core.publisher.Flux;
 public class CodeCraftFacade {
 
     @Resource
-    private CodeCraftAiChatService chatService;
+    private CodeCraftAiModelFactory aiModelFactory;
 
     /**
      * 聊天并保存
@@ -44,6 +43,7 @@ public class CodeCraftFacade {
         if (Objects.isNull(codeGenType)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请选择代码生成模式");
         }
+        CodeCraftAiChatService chatService = aiModelFactory.getAiService(appId);
         return switch (codeGenType) {
             case HTML -> {
                 AiChatHtmlResDto aiChatHtmlResDto = chatService.chatHtml(userMessage);
@@ -72,6 +72,8 @@ public class CodeCraftFacade {
         if (Objects.isNull(codeGenType)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请选择代码生成模式");
         }
+        log.info("代码生成");
+        CodeCraftAiChatService chatService = aiModelFactory.getAiService(appId);
         return switch (codeGenType) {
             case HTML -> {
                 Flux<String> stringFlux = chatService.chatHtmlStream(userMessage);
@@ -89,7 +91,10 @@ public class CodeCraftFacade {
 
     private Flux<String> chatAndSaveStream(Flux<String> chatStream, CodeGenTypeEnum codeGenTypeEnum, Long appId) {
         StringBuilder content = new StringBuilder();
-        return chatStream.doOnNext(content::append).doOnComplete(() -> {
+        return chatStream.doOnNext(chunk -> {
+            content.append(chunk);
+            log.info("ai 回复: {}", chunk);
+        }).doOnComplete(() -> {
             try {
                 FileSaverExecutor.executeSave(CodeParserExecutor.executeParse(content.toString(), codeGenTypeEnum),
                     codeGenTypeEnum, appId);
