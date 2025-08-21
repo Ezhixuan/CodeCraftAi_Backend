@@ -12,6 +12,7 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 import static java.util.Objects.isNull;
@@ -44,6 +45,15 @@ public class SysChatHistoryServiceImpl extends ServiceImpl<SysChatHistoryMapper,
     public Page<ChatInfoResVo> list(ChatQueryReqVo reqVo) {
         QueryWrapper queryWrapper = getQueryWrapper(reqVo);
         return PageRequest.convert(page(reqVo.toPage(), queryWrapper), ChatInfoResVo::new);
+    }
+
+    @Override
+    public List<SysChatHistory> loadChatMemoryMessages(long memoryId, int maxMessages) {
+        QueryWrapper queryWrapper = QueryWrapper.create()
+                .eq(SysChatHistory::getAppId, memoryId)
+                .orderBy(SysChatHistory::getCreateTime, false)
+                .limit(1, maxMessages);
+        return list(queryWrapper).reversed();
     }
 
     private QueryWrapper getQueryWrapper(ChatQueryReqVo reqVo) {

@@ -10,6 +10,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.List;
+
 /**
  * 对话历史 服务层。
  *
@@ -41,4 +43,13 @@ public interface SysChatHistoryService extends IService<SysChatHistory> {
      * @return PageResponse<ChatQueryReqVo> 查询结果列表
      */
     Page<ChatInfoResVo> list(ChatQueryReqVo reqVo);
+
+    /**
+     * 加载聊天记忆消息
+     * @param memoryId 记忆 id
+     * @param maxMessages 最大消息数
+     * @author Ezhixuan
+     * @return List<SysChatHistory> 聊天记录
+     */
+    List<SysChatHistory> loadChatMemoryMessages(long memoryId, int maxMessages);
 }

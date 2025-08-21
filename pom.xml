@@ -114,7 +114,12 @@
             <artifactId>langchain4j-community-redis-spring-boot-starter</artifactId>
             <version>${LangChain.other.version}</version>
         </dependency>
-
+        <!-- caffeine -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>3.2.0</version>
+        </dependency>
     </dependencies>
 
     <build>
