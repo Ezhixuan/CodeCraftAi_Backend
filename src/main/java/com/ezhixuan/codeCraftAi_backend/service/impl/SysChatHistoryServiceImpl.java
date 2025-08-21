@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 /**
  * 对话历史 服务层实现。
@@ -47,10 +48,16 @@ public class SysChatHistoryServiceImpl extends ServiceImpl<SysChatHistoryMapper,
 
     private QueryWrapper getQueryWrapper(ChatQueryReqVo reqVo) {
         QueryWrapper queryWrapper = QueryWrapper.create();
-        queryWrapper.eq(SysChatHistory::getAppId, reqVo.getAppId());
+        if (nonNull(reqVo.getAppId()) && reqVo.getAppId() > 0) {
+            // 管理员查询全部时默认传-1
+            queryWrapper.eq(SysChatHistory::getAppId, reqVo.getAppId());
+        }
+        queryWrapper.eq(SysChatHistory::getId, reqVo.getId());
+        queryWrapper.eq(SysChatHistory::getMessageType, reqVo.getMessageType());
         queryWrapper.eq(SysChatHistory::getUserId, reqVo.getUserId());
-        queryWrapper.lt(SysChatHistory::getCreateTime, reqVo.getCreateTime());
-        queryWrapper.orderBy(SysChatHistory::getCreateTime, Objects.equals(reqVo.getOrderBy(), PageRequest.DESC));
+        queryWrapper.lt(SysChatHistory::getCreateTime, reqVo.getEndTime());
+        queryWrapper.gt(SysChatHistory::getCreateTime, reqVo.getStartTime());
+        queryWrapper.orderBy(SysChatHistory::getCreateTime, Objects.equals(reqVo.getOrderBy(), PageRequest.ASC));
         return queryWrapper;
     }
 }

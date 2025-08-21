@@ -40,5 +40,5 @@ public interface SysChatHistoryService extends IService<SysChatHistory> {
      * @param reqVo 查询参数
      * @return PageResponse<ChatQueryReqVo> 查询结果列表
      */
-    Page<ChatInfoResVo> list(@Valid ChatQueryReqVo reqVo);
+    Page<ChatInfoResVo> list(ChatQueryReqVo reqVo);
 }

@@ -17,6 +17,9 @@ public class ChatQueryReqVo extends PageRequest implements Serializable {
     @Serial
     private static final long serialVersionUID = -6028462213233147188L;
 
+    @Schema(description = "对话 id")
+    private Long id;
+
     @NotNull
     @Schema(description = "应用ID")
     private Long appId;
@@ -24,7 +27,13 @@ public class ChatQueryReqVo extends PageRequest implements Serializable {
     @Schema(description = "用户 id")
     private Long userId;
 
+    @Schema(description = "消息类型")
+    private String messageType;
+
     @Schema(description = "创建时间")
-    private LocalDateTime createTime;
+    private LocalDateTime startTime;
+
+    @Schema(description = "结束时间")
+    private LocalDateTime endTime;
 }
 

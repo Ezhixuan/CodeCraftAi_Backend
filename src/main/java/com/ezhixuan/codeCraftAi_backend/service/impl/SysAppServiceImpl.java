@@ -69,10 +69,9 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp>  implem
                         .appId(appId)
                         .build()
         );
-        Flux<String> flux = codeCraftFacade.chatAndSaveStream(message, CodeGenTypeEnum.getEnumByValue(sysApp.getCodeGenType()), appId);
         StringBuilder contentBuilder = new StringBuilder();
-        log.info("flux = {}", flux);
-        return flux.doOnNext(contentBuilder::append)
+        return codeCraftFacade.chatAndSaveStream(message, CodeGenTypeEnum.getEnumByValue(sysApp.getCodeGenType()), appId)
+                .doOnNext(contentBuilder::append)
                 .doOnComplete(() -> {
                     chatHistoryService.save(
                             SysChatHistorySubmitDto.builder()

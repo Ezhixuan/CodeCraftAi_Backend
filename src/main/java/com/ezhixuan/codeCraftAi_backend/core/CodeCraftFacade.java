@@ -72,7 +72,6 @@ public class CodeCraftFacade {
         if (Objects.isNull(codeGenType)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请选择代码生成模式");
         }
-        log.info("代码生成");
         CodeCraftAiChatService chatService = aiModelFactory.getAiService(appId);
         return switch (codeGenType) {
             case HTML -> {
@@ -91,10 +90,7 @@ public class CodeCraftFacade {
 
     private Flux<String> chatAndSaveStream(Flux<String> chatStream, CodeGenTypeEnum codeGenTypeEnum, Long appId) {
         StringBuilder content = new StringBuilder();
-        return chatStream.doOnNext(chunk -> {
-            content.append(chunk);
-            log.info("ai 回复: {}", chunk);
-        }).doOnComplete(() -> {
+        return chatStream.doOnNext(content::append).doOnComplete(() -> {
             try {
                 FileSaverExecutor.executeSave(CodeParserExecutor.executeParse(content.toString(), codeGenTypeEnum),
                     codeGenTypeEnum, appId);
