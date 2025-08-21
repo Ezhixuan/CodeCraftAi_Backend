@@ -20,10 +20,10 @@ public class CodeCraftAiModelFactory {
     @Resource
     private RedisChatMemoryStore redisChatMemoryStore;
 
-    public CodeCraftAiChatService getAiService(long appId) {
+    public CodeCraftAiChatService getAiService(long memoryId) {
         MessageWindowChatMemory chatMemory = MessageWindowChatMemory.builder()
                 .chatMemoryStore(redisChatMemoryStore)
-                .id(appId)
+                .id(memoryId)
                 .maxMessages(10)
                 .build();
         return AiServices.builder(CodeCraftAiChatService.class)
