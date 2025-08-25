@@ -4,7 +4,9 @@ import com.ezhixuan.codeCraftAi_backend.ai.model.AiChatBaseResDto;
 import com.ezhixuan.codeCraftAi_backend.ai.model.AiChatHtmlCssScriptResDto;
 import com.ezhixuan.codeCraftAi_backend.ai.model.AiChatHtmlResDto;
 
+import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.UserMessage;
 import reactor.core.publisher.Flux;
 
 public interface CodeCraftAiChatService {
@@ -65,4 +67,14 @@ public interface CodeCraftAiChatService {
      */
     @SystemMessage(fromResource = "prompt/codeCraft-htmlAcssAjs-generate-system-prompt.txt")
     Flux<String> chatHtmlCssScriptStream(String userMessage);
+
+    /**
+     * vue 工程化项目模式对话
+     * @author Ezhixuan
+     * @param memoryId 记忆id
+     * @param userMessage 用户信息
+     * @return AiChatHtmlCssScriptResDto html信息
+     */
+    @SystemMessage(fromResource = "prompt/codeCraft-vueProject-generate-system-prompt.txt")
+    Flux<String> vueProjectStream(@MemoryId long memoryId, @UserMessage String userMessage);
 }

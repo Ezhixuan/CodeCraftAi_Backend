@@ -7,7 +7,8 @@ import lombok.Getter;
 public enum CodeGenTypeEnum {
 
     HTML("原生 HTML 模式", "html"),
-    HTML_MULTI_FILE("原生多文件模式", "multi_file");
+    HTML_MULTI_FILE("原生多文件模式", "multi_file"),
+    VUE_PROJECT("Vue 模式", "vue_project");
 
     private final String text;
     private final String value;
