@@ -5,10 +5,13 @@ import com.ezhixuan.codeCraftAi_backend.ai.CodeCraftAiModelFactory;
 import com.ezhixuan.codeCraftAi_backend.ai.model.AiChatHtmlCssScriptResDto;
 import com.ezhixuan.codeCraftAi_backend.ai.model.AiChatHtmlResDto;
 import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
+import com.ezhixuan.codeCraftAi_backend.ai.tools.ToolEnum;
+import com.ezhixuan.codeCraftAi_backend.ai.tools.ToolResHandler;
 import com.ezhixuan.codeCraftAi_backend.core.parser.CodeParserExecutor;
 import com.ezhixuan.codeCraftAi_backend.core.saver.FileSaverExecutor;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
+import dev.langchain4j.service.TokenStream;
 import jakarta.annotation.Resource;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -85,8 +88,8 @@ public class CodeCraftFacade {
         yield chatAndSaveStream(stringFlux, codeGenType, appId);
       }
       case VUE_PROJECT -> {
-        Flux<String> stringFlux = chatService.vueProjectStream(appId, userMessage);
-        yield chatAndSaveStream(stringFlux, CodeGenTypeEnum.HTML_MULTI_FILE, appId);
+        TokenStream stringFlux = chatService.vueProjectStream(appId, userMessage);
+        yield convertToFlux(stringFlux);
       }
       default -> {
         throw new BusinessException(ErrorCode.PARAMS_ERROR, "请选择正确的代码生成模式");
@@ -110,5 +113,29 @@ public class CodeCraftFacade {
                 log.error("解析 html 失败", e);
               }
             });
+  }
+
+  private Flux<String> convertToFlux(TokenStream tokenStream) {
+    return Flux.create(
+        sink -> {
+          tokenStream
+              .onPartialResponse(sink::next)
+              .beforeToolExecution(
+                  (beforeToolExecution) -> {
+                    String toolName = beforeToolExecution.request().name();
+                    ToolEnum tool = ToolEnum.getByToolName(toolName);
+                    String result = String.format("\n\n调用[%s]进行操作\n\n", tool.getText());
+                    sink.next(result);
+                  })
+              .onToolExecuted(
+                  (toolExecution) -> {
+                    String toolName = toolExecution.request().name();
+                    ToolEnum tool = ToolEnum.getByToolName(toolName);
+                    sink.next(ToolResHandler.handleToolRes(tool, toolExecution));
+                  })
+              .onCompleteResponse((completeResponse) -> sink.complete())
+              .onError(sink::error)
+              .start();
+        });
   }
 }

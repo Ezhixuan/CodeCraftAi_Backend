@@ -17,7 +17,7 @@ class CodeCraftFacadeTest {
 
     @Test
     void chatAndSave() {
-        File file = codeCraftFacade.chatAndSave("请生成一个现代化风格的登录页面", CodeGenTypeEnum.HTML_MULTI_FILE, 1L);
+        File file = codeCraftFacade.chatAndSave("请生成一个现代化风格的登录页面,总代码不超过 20 行", CodeGenTypeEnum.HTML_MULTI_FILE, 1L);
         assert file != null;
     }
 
@@ -40,7 +40,7 @@ class CodeCraftFacadeTest {
     @Test
     void vueProjectStream() {
         Flux<String> stringFlux =
-            codeCraftFacade.chatAndSaveStream("请生成一个 todolist 项目", CodeGenTypeEnum.VUE_PROJECT, 2L);
+            codeCraftFacade.chatAndSaveStream("请生成一个简单的 todolist 项目,总代码不超过 500 行", CodeGenTypeEnum.VUE_PROJECT, 2L);
         List<String> blocked = stringFlux.collectList().block();
         assert blocked != null;
         String joined = String.join("", blocked);

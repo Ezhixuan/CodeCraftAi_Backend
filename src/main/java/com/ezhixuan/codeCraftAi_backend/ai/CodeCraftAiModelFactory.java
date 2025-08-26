@@ -28,7 +28,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CodeCraftAiModelFactory {
 
-    private static final int MAX_MESSAGES = 10;
+    private static final int MAX_MESSAGES = 25;
     private final ChatModel chatModel;
     private final StreamingChatModel openAiStreamingChatModel;
     private final StreamingChatModel powerfulStreamingChatModel;

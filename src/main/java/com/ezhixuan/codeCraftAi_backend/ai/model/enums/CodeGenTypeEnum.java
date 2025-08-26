@@ -1,6 +1,7 @@
 package com.ezhixuan.codeCraftAi_backend.ai.model.enums;
 
 import cn.hutool.core.util.ObjUtil;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 
 @Getter
@@ -10,7 +11,10 @@ public enum CodeGenTypeEnum {
     HTML_MULTI_FILE("原生多文件模式", "multi_file"),
     VUE_PROJECT("Vue 模式", "vue_project");
 
+    @Schema(description = "枚举文本")
     private final String text;
+
+    @Schema(description = "代码生成模式")
     private final String value;
 
     CodeGenTypeEnum(String text, String value) {

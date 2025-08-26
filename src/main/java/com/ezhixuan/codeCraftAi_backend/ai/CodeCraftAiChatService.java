@@ -6,6 +6,7 @@ import com.ezhixuan.codeCraftAi_backend.ai.model.AiChatHtmlResDto;
 
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
+import dev.langchain4j.service.TokenStream;
 import dev.langchain4j.service.UserMessage;
 import reactor.core.publisher.Flux;
 
@@ -76,5 +77,5 @@ public interface CodeCraftAiChatService {
      * @return AiChatHtmlCssScriptResDto html信息
      */
     @SystemMessage(fromResource = "prompt/codeCraft-vueProject-generate-system-prompt.txt")
-    Flux<String> vueProjectStream(@MemoryId long memoryId, @UserMessage String userMessage);
+    TokenStream vueProjectStream(@MemoryId long memoryId, @UserMessage String userMessage);
 }
