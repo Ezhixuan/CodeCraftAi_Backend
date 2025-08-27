@@ -40,3 +40,4 @@ build/
 /src/main/resources/application-kimi2.yml
 /src/main/resources/application-deepseek.yml
 /qodana.yaml
+/temp/

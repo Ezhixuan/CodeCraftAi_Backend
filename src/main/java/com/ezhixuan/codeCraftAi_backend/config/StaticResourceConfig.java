@@ -4,8 +4,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.ezhixuan.codeCraftAi_backend.utils.PathUtil;
-
 /**
  * 静态资源配置
  * 配置静态资源访问路径映射
