@@ -10,6 +10,7 @@ import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppQueryReqVo;
 import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoAdminResVo;
 import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoCommonResVo;
 import com.ezhixuan.codeCraftAi_backend.core.CodeCraftFacade;
+import com.ezhixuan.codeCraftAi_backend.core.builder.BuildExecutor;
 import com.ezhixuan.codeCraftAi_backend.domain.dto.sys.chatHistory.SysChatHistorySubmitDto;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
 import com.ezhixuan.codeCraftAi_backend.domain.enums.MessageTypeEnum;
@@ -70,43 +71,39 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp>  implem
                         .build()
         );
         StringBuilder contentBuilder = new StringBuilder();
-        return codeCraftFacade.chatAndSaveStream(message, CodeGenTypeEnum.getEnumByValue(sysApp.getCodeGenType()), appId)
-                .doOnNext(contentBuilder::append)
-                .doOnComplete(() -> {
-                    chatHistoryService.save(
-                            SysChatHistorySubmitDto.builder()
-                                    .message(contentBuilder.toString())
-                                    .userId(userId)
-                                    .messageTypeEnum(MessageTypeEnum.AI)
-                                    .appId(appId)
-                                    .build()
-                    );
-                })
-                .doOnError(error -> {
-                    log.error("解析失败", error);
-                    chatHistoryService.save(
-                            SysChatHistorySubmitDto.builder()
-                                    .message("ai 消息回复失败" + error.getMessage())
-                                    .userId(userId)
-                                    .messageTypeEnum(MessageTypeEnum.AI)
-                                    .appId(appId)
-                                    .build()
-                    );
-                })
-                .map(chunk -> {
-                    Map<String, String> d = Map.of("d", chunk);
-                    String jsonStr = JSONUtil.toJsonStr(d);
-                    return ServerSentEvent.<String>builder()
-                            .data(jsonStr)
-                            .build();
-                })
-                .concatWith(Mono.just(
-                        ServerSentEvent.<String>builder()
-                                .event("done")
-                                .data("")
-                                .build()
-                ));
-
+    CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getEnumByValue(sysApp.getCodeGenType());
+    return codeCraftFacade
+        .chatAndSaveStream(message, codeGenType, appId)
+        .doOnNext(contentBuilder::append)
+        .doOnComplete(
+            () -> {
+              chatHistoryService.save(
+                  SysChatHistorySubmitDto.builder()
+                      .message(contentBuilder.toString())
+                      .userId(userId)
+                      .messageTypeEnum(MessageTypeEnum.AI)
+                      .appId(appId)
+                      .build());
+              BuildExecutor.build(appId, codeGenType, true);
+            })
+        .doOnError(
+            error -> {
+              log.error("解析失败", error);
+              chatHistoryService.save(
+                  SysChatHistorySubmitDto.builder()
+                      .message("ai 消息回复失败" + error.getMessage())
+                      .userId(userId)
+                      .messageTypeEnum(MessageTypeEnum.AI)
+                      .appId(appId)
+                      .build());
+            })
+        .map(
+            chunk -> {
+              Map<String, String> d = Map.of("d", chunk);
+              String jsonStr = JSONUtil.toJsonStr(d);
+              return ServerSentEvent.<String>builder().data(jsonStr).build();
+            })
+        .concatWith(Mono.just(ServerSentEvent.<String>builder().event("done").data("").build()));
     }
 
     @Override
