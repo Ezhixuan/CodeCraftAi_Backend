@@ -1,9 +1,5 @@
 package com.ezhixuan.codeCraftAi_backend.service;
 
-import java.util.Map;
-
-import org.springframework.http.codec.ServerSentEvent;
-
 import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppGenerateReqVo;
 import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppInfoAdminResVo;
 import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppInfoCommonResVo;
@@ -13,8 +9,11 @@ import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoCommonResVo;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.service.IService;
-
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.codec.ServerSentEvent;
 import reactor.core.publisher.Flux;
+
+import java.util.Map;
 
 /**
  *  服务层。
@@ -74,4 +73,22 @@ public interface SysAppService extends IService<SysApp> {
      * @return SysApp 应用信息
      */
     SysApp getByDeployKey(String deployKey);
+
+    /**
+     * 将文件复制到 preview 文件夹
+     *
+     * @param appId   应用 id
+     * @param reBuild 重构 只有应用用户为当前用户才可以进行
+     * @return String
+     * @author Ezhixuan
+     */
+    String copyToPreview(Long appId, boolean reBuild);
+
+    /**
+     * 重定向到预览页面
+     * @author Ezhixuan
+     * @param previewKey 预览标识
+     * @param response 响应
+     */
+    void redirect(String previewKey, HttpServletResponse response);
 }

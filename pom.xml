@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.ezhixuan.common</groupId>
     <artifactId>Common_Backend</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2-beta</version>
     <name>Common_Backend</name>
     <description>Common_Backend</description>
     <url/>
