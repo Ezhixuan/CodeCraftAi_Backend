@@ -15,13 +15,11 @@ import lombok.RequiredArgsConstructor;
 @AllArgsConstructor
 public class FileSaverDto {
 
-    @NotNull
-    private Object aiChatDto;
+  @NotNull private Object aiChatDto;
 
-    @NotNull
-    private CodeGenTypeEnum codeGenTypeEnum;
+  @NotNull private CodeGenTypeEnum codeGenTypeEnum;
 
-    @NotNull
-    @Min(value = 1)
-    private Long appId;
+  @NotNull
+  @Min(value = 1)
+  private Long appId;
 }

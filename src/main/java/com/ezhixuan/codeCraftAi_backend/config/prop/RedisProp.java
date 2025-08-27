@@ -10,12 +10,12 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("spring.data.redis")
 public class RedisProp {
 
-    @Schema(description = "redis host")
-    private String host = "localhost";
+  @Schema(description = "redis host")
+  private String host = "localhost";
 
-    @Schema(description = "redis port")
-    private int port = 6379;
+  @Schema(description = "redis port")
+  private int port = 6379;
 
-    @Schema(description = "LangChain 记忆过期时间")
-    private long ttl = 3600;
+  @Schema(description = "LangChain 记忆过期时间")
+  private long ttl = 3600;
 }

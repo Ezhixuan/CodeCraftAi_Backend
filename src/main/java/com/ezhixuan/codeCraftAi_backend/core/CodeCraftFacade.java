@@ -24,6 +24,14 @@ import reactor.core.publisher.Flux;
 import java.io.File;
 import java.util.Objects;
 
+/**
+ * 代码工匠门面类
+ * 提供AI代码生成和保存的核心业务功能，封装了聊天、解析和保存的完整流程
+ * 支持同步和异步流式处理两种模式
+ *
+ * @author ezhixuan
+ * @version 0.0.1beta
+ */
 @Service
 @Slf4j
 @Validated
@@ -32,12 +40,14 @@ public class CodeCraftFacade {
   @Resource private CodeCraftAiModelFactory aiModelFactory;
 
   /**
-   * 聊天并保存
+   * 聊天并保存生成的代码
+   * 根据代码生成类型调用相应的AI服务生成代码，并保存到文件系统
    *
-   * @author Ezhixuan
-   * @param userMessage 用户消息
-   * @param codeGenType 代码生成模式
-   * @return 文件
+   * @param userMessage 用户输入的消息
+   * @param codeGenType 代码生成类型枚举
+   * @param appId 应用ID
+   * @return 保存的文件对象
+   * @throws BusinessException 当参数错误或生成模式不支持时抛出业务异常
    */
   public File chatAndSave(
       @NotBlank String userMessage,
@@ -64,11 +74,14 @@ public class CodeCraftFacade {
   }
 
   /**
-   * 聊天并保存 (流式)
+   * 流式聊天并保存生成的代码
+   * 根据代码生成类型调用相应的AI服务生成代码流，并在完成后保存到文件系统
    *
-   * @param userMessage 用户消息
-   * @param codeGenType 代码生成类型
-   * @return Flux 流
+   * @param userMessage 用户输入的消息
+   * @param codeGenType 代码生成类型枚举
+   * @param appId 应用ID
+   * @return 包含生成内容的Flux流
+   * @throws BusinessException 当参数错误或生成模式不支持时抛出业务异常
    */
   public Flux<String> chatAndSaveStream(
       @NotBlank String userMessage,
@@ -97,6 +110,15 @@ public class CodeCraftFacade {
     };
   }
 
+  /**
+   * 流式聊天并保存的处理方法
+   * 收集流中的内容，在流完成时进行解析和保存操作
+   *
+   * @param chatStream 聊天内容流
+   * @param codeGenTypeEnum 代码生成类型枚举
+   * @param appId 应用ID
+   * @return 包含生成内容的Flux流
+   */
   private Flux<String> chatAndSaveStream(
       Flux<String> chatStream, CodeGenTypeEnum codeGenTypeEnum, Long appId) {
     StringBuilder content = new StringBuilder();
@@ -115,6 +137,13 @@ public class CodeCraftFacade {
             });
   }
 
+  /**
+   * 将TokenStream转换为Flux流
+   * 处理AI服务返回的TokenStream，转换为Flux流并处理工具执行相关事件
+   *
+   * @param tokenStream AI服务返回的TokenStream
+   * @return 包含生成内容的Flux流
+   */
   private Flux<String> convertToFlux(TokenStream tokenStream) {
     return Flux.create(
         sink -> {

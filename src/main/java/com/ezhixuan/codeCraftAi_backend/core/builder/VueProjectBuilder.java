@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * Vue项目构建器 用于构建Vue项目的npm依赖安装和项目打包
  *
+ * @version 0.0.1beta
  * @author Ezhixuan
  */
 @Slf4j

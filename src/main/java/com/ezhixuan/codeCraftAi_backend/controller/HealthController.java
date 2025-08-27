@@ -16,17 +16,17 @@ import java.util.List;
 @RestController
 public class HealthController {
 
-    @Operation(summary = "健康检查")
-    @GetMapping("/health")
-    public BaseResponse<String> isOk() {
-        return R.SUCCESS;
-    }
+  @Operation(summary = "健康检查")
+  @GetMapping("/health")
+  public BaseResponse<String> isOk() {
+    return R.SUCCESS;
+  }
 
-    @Operation(summary = "列表")
-    @GetMapping("/list")
-    public PageResponse<String> list() {
-        List<String> list = new ArrayList<>();
-        list.add("1");
-        return R.list(list);
-    }
+  @Operation(summary = "列表")
+  @GetMapping("/list")
+  public PageResponse<String> list() {
+    List<String> list = new ArrayList<>();
+    list.add("1");
+    return R.list(list);
+  }
 }

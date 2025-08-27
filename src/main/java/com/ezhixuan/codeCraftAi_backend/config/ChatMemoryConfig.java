@@ -9,15 +9,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ChatMemoryConfig {
 
-    @Resource
-    private RedisProp redisProp;
+  @Resource private RedisProp redisProp;
 
-    @Bean
-    public RedisChatMemoryStore redisChatMemoryStore() {
-        return RedisChatMemoryStore.builder()
-                .host(redisProp.getHost())
-                .port(redisProp.getPort())
-                .ttl(redisProp.getTtl())
-                .build();
-    }
+  @Bean
+  public RedisChatMemoryStore redisChatMemoryStore() {
+    return RedisChatMemoryStore.builder()
+        .host(redisProp.getHost())
+        .port(redisProp.getPort())
+        .ttl(redisProp.getTtl())
+        .build();
+  }
 }

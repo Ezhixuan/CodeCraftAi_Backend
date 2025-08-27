@@ -24,50 +24,53 @@ import static java.util.Objects.nonNull;
  * @author Ezhixuan
  */
 @Service
-public class SysChatHistoryServiceImpl extends ServiceImpl<SysChatHistoryMapper, SysChatHistory>  implements SysChatHistoryService{
+public class SysChatHistoryServiceImpl extends ServiceImpl<SysChatHistoryMapper, SysChatHistory>
+    implements SysChatHistoryService {
 
-    @Override
-    public boolean save(SysChatHistorySubmitDto chatHistorySubmitDto) {
-        SysChatHistory entity = chatHistorySubmitDto.toEntity();
-        return save(entity);
-    }
+  @Override
+  public boolean save(SysChatHistorySubmitDto chatHistorySubmitDto) {
+    SysChatHistory entity = chatHistorySubmitDto.toEntity();
+    return save(entity);
+  }
 
-    @Override
-    public boolean removeByAppId(Long appId) {
-        if (isNull(appId)) {
-            return false;
-        }
-        QueryWrapper queryWrapper = QueryWrapper.create().eq(SysChatHistory::getAppId, appId);
-        return remove(queryWrapper);
+  @Override
+  public boolean removeByAppId(Long appId) {
+    if (isNull(appId)) {
+      return false;
     }
+    QueryWrapper queryWrapper = QueryWrapper.create().eq(SysChatHistory::getAppId, appId);
+    return remove(queryWrapper);
+  }
 
-    @Override
-    public Page<ChatInfoResVo> list(ChatQueryReqVo reqVo) {
-        QueryWrapper queryWrapper = getQueryWrapper(reqVo);
-        return PageRequest.convert(page(reqVo.toPage(), queryWrapper), ChatInfoResVo::new);
-    }
+  @Override
+  public Page<ChatInfoResVo> list(ChatQueryReqVo reqVo) {
+    QueryWrapper queryWrapper = getQueryWrapper(reqVo);
+    return PageRequest.convert(page(reqVo.toPage(), queryWrapper), ChatInfoResVo::new);
+  }
 
-    @Override
-    public List<SysChatHistory> loadChatMemoryMessages(long memoryId, int maxMessages) {
-        QueryWrapper queryWrapper = QueryWrapper.create()
-                .eq(SysChatHistory::getAppId, memoryId)
-                .orderBy(SysChatHistory::getCreateTime, false)
-                .limit(1, maxMessages);
-        return list(queryWrapper).reversed();
-    }
+  @Override
+  public List<SysChatHistory> loadChatMemoryMessages(long memoryId, int maxMessages) {
+    QueryWrapper queryWrapper =
+        QueryWrapper.create()
+            .eq(SysChatHistory::getAppId, memoryId)
+            .orderBy(SysChatHistory::getCreateTime, false)
+            .limit(1, maxMessages);
+    return list(queryWrapper).reversed();
+  }
 
-    private QueryWrapper getQueryWrapper(ChatQueryReqVo reqVo) {
-        QueryWrapper queryWrapper = QueryWrapper.create();
-        if (nonNull(reqVo.getAppId()) && reqVo.getAppId() > 0) {
-            // 管理员查询全部时默认传-1
-            queryWrapper.eq(SysChatHistory::getAppId, reqVo.getAppId());
-        }
-        queryWrapper.eq(SysChatHistory::getId, reqVo.getId());
-        queryWrapper.eq(SysChatHistory::getMessageType, reqVo.getMessageType());
-        queryWrapper.eq(SysChatHistory::getUserId, reqVo.getUserId());
-        queryWrapper.lt(SysChatHistory::getCreateTime, reqVo.getEndTime());
-        queryWrapper.gt(SysChatHistory::getCreateTime, reqVo.getStartTime());
-        queryWrapper.orderBy(SysChatHistory::getCreateTime, Objects.equals(reqVo.getOrderBy(), PageRequest.ASC));
-        return queryWrapper;
+  private QueryWrapper getQueryWrapper(ChatQueryReqVo reqVo) {
+    QueryWrapper queryWrapper = QueryWrapper.create();
+    if (nonNull(reqVo.getAppId()) && reqVo.getAppId() > 0) {
+      // 管理员查询全部时默认传-1
+      queryWrapper.eq(SysChatHistory::getAppId, reqVo.getAppId());
     }
+    queryWrapper.eq(SysChatHistory::getId, reqVo.getId());
+    queryWrapper.eq(SysChatHistory::getMessageType, reqVo.getMessageType());
+    queryWrapper.eq(SysChatHistory::getUserId, reqVo.getUserId());
+    queryWrapper.lt(SysChatHistory::getCreateTime, reqVo.getEndTime());
+    queryWrapper.gt(SysChatHistory::getCreateTime, reqVo.getStartTime());
+    queryWrapper.orderBy(
+        SysChatHistory::getCreateTime, Objects.equals(reqVo.getOrderBy(), PageRequest.ASC));
+    return queryWrapper;
+  }
 }

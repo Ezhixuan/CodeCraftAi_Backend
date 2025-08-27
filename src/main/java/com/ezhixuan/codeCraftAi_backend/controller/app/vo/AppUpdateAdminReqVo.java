@@ -14,24 +14,23 @@ import lombok.EqualsAndHashCode;
 @Data
 public class AppUpdateAdminReqVo extends AppConverter implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = -8337583786116753335L;
+  @Serial private static final long serialVersionUID = -8337583786116753335L;
 
-    @NotNull
-    @Schema(description = "应用ID")
-    private Long id;
+  @NotNull
+  @Schema(description = "应用ID")
+  private Long id;
 
-    @Size(min = 1, max = 12, message = "应用名称长度在 1 到 12 个字符之间")
-    @Schema(description = "应用名称")
-    private String name;
+  @Size(min = 1, max = 12, message = "应用名称长度在 1 到 12 个字符之间")
+  @Schema(description = "应用名称")
+  private String name;
 
-    @Schema(description = "应用封面")
-    private String cover;
+  @Schema(description = "应用封面")
+  private String cover;
 
-    @Schema(description = "部署密钥")
-    private String deployKey;
+  @Schema(description = "部署密钥")
+  private String deployKey;
 
-    @Min(value = 0, message = "应用优先级最小为 0")
-    @Schema(description = "优先级")
-    private Integer priority;
+  @Min(value = 0, message = "应用优先级最小为 0")
+  @Schema(description = "优先级")
+  private Integer priority;
 }

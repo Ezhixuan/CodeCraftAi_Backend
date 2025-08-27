@@ -16,79 +16,81 @@ import reactor.core.publisher.Flux;
 import java.util.Map;
 
 /**
- *  服务层。
+ * 应用服务接口 提供应用相关的业务逻辑处理接口，包括代码生成、应用管理、预览部署等功能
  *
  * @author Ezhixuan
+ * @version 0.0.1beta
  */
 public interface SysAppService extends IService<SysApp> {
 
-    /**
-     * 代码生成
-     * @author Ezhixuan
-     * @param message 用户输入
-     * @param appId 应用id
-     * @return Flux<ServerSentEvent < String>> sse流式返回
-     */
-    Flux<ServerSentEvent<String>> generateCode(String message, Long appId);
+  /**
+   * 代码生成 根据用户输入生成代码，并以SSE流式方式返回生成过程和结果
+   *
+   * @param message 用户输入的生成需求描述
+   * @param appId 应用ID
+   * @return Flux<ServerSentEvent<String>> SSE流式返回生成过程和结果
+   */
+  Flux<ServerSentEvent<String>> generateCode(String message, Long appId);
 
-    /**
-     * 通过用户输入内容生成记录
-     * @author Ezhixuan
-     * @param reqVo 请求体,携带初始化提示
-     * @return Long
-     */
-    Long doGenerate(AppGenerateReqVo reqVo);
+  /**
+   * 通过用户输入内容生成记录 根据用户输入创建新的应用生成记录
+   *
+   * @param reqVo 请求体，携带初始化提示信息
+   * @return Long 生成的应用ID
+   */
+  Long doGenerate(AppGenerateReqVo reqVo);
 
-    /**
-     * 获取用户应用列表
-     * @author Ezhixuan
-     * @param queryReqVo 请求体
-     * @param limit 查询限制
-     * @return Page<AppInfoCommonResVo>
-     */
-    Page<SysApp> getList(AppQueryReqVo queryReqVo, boolean limit);
+  /**
+   * 获取用户应用列表 根据查询条件获取用户的应用列表
+   *
+   * @param queryReqVo 查询请求体，包含查询条件
+   * @param limit 是否限制查询结果
+   * @return Page<SysApp> 应用分页列表
+   */
+  Page<SysApp> getList(AppQueryReqVo queryReqVo, boolean limit);
 
-    /**
-     * 提供 common 返回
-     * @author Ezhixuan
-     * @param sysAppPage getList 返回的 Page
-     * @param userInfoMap 用户信息
-     * @return Page<AppInfoCommonResVo> common 返回
-     */
-    Page<AppInfoCommonResVo> convert2Common(Page<SysApp> sysAppPage, Map<Long, UserInfoCommonResVo> userInfoMap);
+  /**
+   * 转换为通用返回格式 将应用分页列表转换为通用返回格式
+   *
+   * @param sysAppPage getList返回的应用分页列表
+   * @param userInfoMap 用户信息映射表
+   * @return Page<AppInfoCommonResVo> 通用返回格式的应用分页列表
+   */
+  Page<AppInfoCommonResVo> convert2Common(
+      Page<SysApp> sysAppPage, Map<Long, UserInfoCommonResVo> userInfoMap);
 
-    /**
-     * 提供 admin 返回
-     * @author Ezhixuan
-     * @param sysAppPage getList 返回的 Page
-     * @param userInfoMap 用户信息
-     * @return Page<AppInfoAdminResVo> admin 返回
-     */
-    Page<AppInfoAdminResVo> convert2Admin(Page<SysApp> sysAppPage, Map<Long, UserInfoAdminResVo> userInfoMap);
+  /**
+   * 转换为管理端返回格式 将应用分页列表转换为管理端返回格式
+   *
+   * @param sysAppPage getList返回的应用分页列表
+   * @param userInfoMap 用户信息映射表
+   * @return Page<AppInfoAdminResVo> 管理端返回格式的应用分页列表
+   */
+  Page<AppInfoAdminResVo> convert2Admin(
+      Page<SysApp> sysAppPage, Map<Long, UserInfoAdminResVo> userInfoMap);
 
-    /**
-     * 通过部署标识获取应用
-     * @author Ezhixuan
-     * @param deployKey 部署标识
-     * @return SysApp 应用信息
-     */
-    SysApp getByDeployKey(String deployKey);
+  /**
+   * 通过部署标识获取应用 根据部署标识查找对应的应用信息
+   *
+   * @param deployKey 部署标识
+   * @return SysApp 应用信息
+   */
+  SysApp getByDeployKey(String deployKey);
 
-    /**
-     * 将文件复制到 preview 文件夹
-     *
-     * @param appId   应用 id
-     * @param reBuild 重构 只有应用用户为当前用户才可以进行
-     * @return String
-     * @author Ezhixuan
-     */
-    String copyToPreview(Long appId, boolean reBuild);
+  /**
+   * 将文件复制到预览文件夹 将生成的代码文件复制到预览文件夹，用于预览展示
+   *
+   * @param appId 应用ID
+   * @param reBuild 是否重新构建，只有应用用户为当前用户才可以进行
+   * @return String 预览标识
+   */
+  String copyToPreview(Long appId, boolean reBuild);
 
-    /**
-     * 重定向到预览页面
-     * @author Ezhixuan
-     * @param previewKey 预览标识
-     * @param response 响应
-     */
-    void redirect(String previewKey, HttpServletResponse response);
+  /**
+   * 重定向到预览页面 根据预览标识重定向到对应的预览页面
+   *
+   * @param previewKey 预览标识
+   * @param response HTTP响应对象
+   */
+  void redirect(String previewKey, HttpServletResponse response);
 }

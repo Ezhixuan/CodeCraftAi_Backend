@@ -9,19 +9,25 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
- * NPM工具类，用于在不同操作系统上执行npm命令 支持Windows和Linux/Mac系统
+ * NPM工具类 用于在不同操作系统上执行npm命令，支持Windows和Linux/Mac系统 提供npm依赖安装和项目构建等常用功能
  *
  * @author Ezhixuan
+ * @version 0.0.1beta
  */
 @Slf4j
 public class NpmUtil {
 
+  /** 操作系统名称 */
   private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
+
+  /** Linux系统npm命令 */
   private static final String LINUX_NPM = "npm";
+
+  /** Windows系统npm命令 */
   private static final String WINDOWS_NPM = "npm.cmd";
 
   /**
-   * 执行npm install命令安装依赖
+   * 执行npm install命令安装依赖 检查package-lock.json和package.json文件是否存在，然后执行npm install命令
    *
    * @param runPath 命令执行路径
    * @return 执行结果，true表示成功，false表示失败
@@ -37,7 +43,7 @@ public class NpmUtil {
   }
 
   /**
-   * 执行npm run build命令构建项目
+   * 执行npm run build命令构建项目 检查package.json文件是否存在，然后执行npm run build命令
    *
    * @param runPath 命令执行路径
    * @return 执行结果，true表示成功，false表示失败
@@ -52,7 +58,7 @@ public class NpmUtil {
   }
 
   /**
-   * 执行npm命令
+   * 执行npm命令 在指定路径下执行npm命令，并设置超时时间
    *
    * @param runPath 命令执行路径
    * @param command 要执行的命令
@@ -79,7 +85,7 @@ public class NpmUtil {
   }
 
   /**
-   * 检查并转换命令中的npm关键字，确保在不同操作系统上使用正确的npm命令
+   * 检查并转换命令中的npm关键字 确保在不同操作系统上使用正确的npm命令
    *
    * @param command 原始命令
    * @return 转换后的命令
@@ -97,6 +103,13 @@ public class NpmUtil {
     return String.join(" ", split);
   }
 
+  /**
+   * 检查文件是否存在
+   *
+   * @param dir 文件目录
+   * @param fileName 文件名
+   * @return 文件不存在返回true，存在返回false
+   */
   private static boolean checkFileIsExist(String dir, String fileName) {
     File dirfile = FileUtil.file(dir);
     File file = FileUtil.file(dirfile, fileName);
@@ -104,7 +117,7 @@ public class NpmUtil {
   }
 
   /**
-   * 获取当前操作系统对应的npm命令
+   * 获取当前操作系统对应的npm命令 根据操作系统类型返回相应的npm命令名称
    *
    * @return npm命令名称
    */
@@ -113,7 +126,7 @@ public class NpmUtil {
   }
 
   /**
-   * 判断当前操作系统是否为Windows
+   * 判断当前操作系统是否为Windows 通过检查操作系统名称是否包含"win"来判断
    *
    * @return true表示Windows系统，false表示其他系统
    */

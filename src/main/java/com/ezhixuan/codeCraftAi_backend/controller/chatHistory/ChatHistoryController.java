@@ -22,18 +22,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ChatHistoryController {
 
-    private final SysChatHistoryService chatHistoryService;
+  private final SysChatHistoryService chatHistoryService;
 
-    @Operation(summary = "获取对话历史列表")
-    @GetMapping("/list")
-    public PageResponse<ChatInfoResVo> list(@Valid ChatQueryReqVo reqVo) {
-        return R.list(chatHistoryService.list(reqVo));
-    }
+  @Operation(summary = "获取对话历史列表")
+  @GetMapping("/list")
+  public PageResponse<ChatInfoResVo> list(@Valid ChatQueryReqVo reqVo) {
+    return R.list(chatHistoryService.list(reqVo));
+  }
 
-    @Operation(summary = "获取对话历史列表 (管理员)")
-    @AuthRole
-    @GetMapping("/admin/list")
-    public PageResponse<ChatInfoResVo> adminList(ChatQueryReqVo reqVo) {
-        return R.list(chatHistoryService.list(reqVo));
-    }
+  @Operation(summary = "获取对话历史列表 (管理员)")
+  @AuthRole
+  @GetMapping("/admin/list")
+  public PageResponse<ChatInfoResVo> adminList(ChatQueryReqVo reqVo) {
+    return R.list(chatHistoryService.list(reqVo));
+  }
 }

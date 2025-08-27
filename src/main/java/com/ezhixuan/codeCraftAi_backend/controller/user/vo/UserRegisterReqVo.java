@@ -12,21 +12,20 @@ import java.io.Serializable;
 @Data
 public class UserRegisterReqVo implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 2904532590291732640L;
+  @Serial private static final long serialVersionUID = 2904532590291732640L;
 
-    @Schema(description = "用户账号")
-    @NotBlank
-    @Length(min = 4, max = 20, message = "账号长度在4-20个字符之间")
-    private String account;
+  @Schema(description = "用户账号")
+  @NotBlank
+  @Length(min = 4, max = 20, message = "账号长度在4-20个字符之间")
+  private String account;
 
-    @Schema(description = "密码")
-    @NotBlank
-    @Length(min = 6, message = "密码长度过短")
-    private String password;
+  @Schema(description = "密码")
+  @NotBlank
+  @Length(min = 6, message = "密码长度过短")
+  private String password;
 
-    @Schema(description = "核对密码")
-    @NotBlank
-    @Length(min = 6, message = "密码长度过短")
-    private String confirmPassword;
+  @Schema(description = "核对密码")
+  @NotBlank
+  @Length(min = 6, message = "密码长度过短")
+  private String confirmPassword;
 }

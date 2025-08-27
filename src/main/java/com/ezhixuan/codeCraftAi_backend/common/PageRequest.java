@@ -14,13 +14,11 @@ import java.util.function.Function;
 @Data
 public class PageRequest {
 
-    private static final Integer PAGE_NO = 1;
-    private static final Integer PAGE_SIZE = 10;
-
     public static final String ASC = "asc";
     public static final String DESC = "desc";
     public static final Integer PAGE_SIZE_NONE = -1;
-
+    private static final Integer PAGE_NO = 1;
+    private static final Integer PAGE_SIZE = 10;
     @Schema(description = "页码，从 1 开始")
     @NotNull(message = "页码不能为空")
     @Min(value = 1, message = "页码最小值为 1")
@@ -35,18 +33,18 @@ public class PageRequest {
     @Schema(description = "排序方式")
     private String orderBy = ASC;
 
-    public <T> Page<T> toPage(){
-        if (Objects.equals(pageSize, PAGE_SIZE_NONE)) {
-            return new Page<>(pageNo, Integer.MAX_VALUE);
-        }
-        return new Page<>(pageNo, pageSize);
-    }
-
     public static <T, R> Page<R> convert(Page<T> tPage, Class<R> rClass) {
         return tPage.map(t -> BeanUtil.copyProperties(t, rClass));
     }
 
     public static <T, R> Page<R> convert(Page<T> tPage, Function<T, R> mapper) {
         return tPage.map(mapper);
+    }
+
+    public <T> Page<T> toPage(){
+        if (Objects.equals(pageSize, PAGE_SIZE_NONE)) {
+            return new Page<>(pageNo, Integer.MAX_VALUE);
+        }
+        return new Page<>(pageNo, pageSize);
     }
 }

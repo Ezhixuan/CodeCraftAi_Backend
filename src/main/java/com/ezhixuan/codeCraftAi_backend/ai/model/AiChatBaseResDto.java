@@ -7,6 +7,6 @@ import lombok.Data;
 @Data
 public class AiChatBaseResDto {
 
-    @Description("AI 思考结果或对于代码的描述")
-    private String result;
+  @Description("AI 思考结果或对于代码的描述")
+  private String result;
 }

@@ -40,13 +40,13 @@ public class PathUtil {
    */
   public static String buildPath(
       String basePath, CodeGenTypeEnum codeGenTypeEnum, Object uniqueId) {
-        String dirName = StrUtil.format("{}_{}", codeGenTypeEnum.getValue(), uniqueId.toString());
-        String path = basePath + File.separator + dirName;
-        // 替换掉 file: 前缀
-        if (path.startsWith("file:")) {
-            path = path.replace("file:", "");
-        }
-        FileUtil.mkdir(path);
-        return path;
+    String dirName = StrUtil.format("{}_{}", codeGenTypeEnum.getValue(), uniqueId.toString());
+    String path = basePath + File.separator + dirName;
+    // 替换掉 file: 前缀
+    if (path.startsWith("file:")) {
+      path = path.replace("file:", "");
     }
+    FileUtil.mkdir(path);
+    return path;
+  }
 }

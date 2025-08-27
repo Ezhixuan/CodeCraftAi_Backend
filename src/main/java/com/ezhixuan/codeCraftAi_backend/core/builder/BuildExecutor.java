@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 构建任务执行器 使用执行器模式处理不同类型的项目构建任务
  *
+ * @version 0.0.1beta
  * @author Ezhixuan
  */
 @Slf4j

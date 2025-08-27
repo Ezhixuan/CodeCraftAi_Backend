@@ -67,7 +67,8 @@ public class AppController {
 
   @Operation(summary = "应用预览")
   @GetMapping("/preview/{appId}")
-  public void doPreview(@PathVariable("appId") Long appId, boolean reBuild, HttpServletResponse response) {
+  public void doPreview(
+      @PathVariable("appId") Long appId, boolean reBuild, HttpServletResponse response) {
     String previewKey = appService.copyToPreview(appId, reBuild);
     appService.redirect(previewKey, response);
   }

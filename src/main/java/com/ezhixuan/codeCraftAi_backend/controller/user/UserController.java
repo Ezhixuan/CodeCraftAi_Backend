@@ -24,79 +24,81 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final SysUserService userService;
+  private final SysUserService userService;
 
-    @Operation(summary = "用户注册")
-    @PostMapping("/register")
-    public BaseResponse<Long> doRegister(@RequestBody @Valid UserRegisterReqVo reqVo) {
-        return R.success(userService.doRegister(reqVo));
-    }
+  @Operation(summary = "用户注册")
+  @PostMapping("/register")
+  public BaseResponse<Long> doRegister(@RequestBody @Valid UserRegisterReqVo reqVo) {
+    return R.success(userService.doRegister(reqVo));
+  }
 
-    @Operation(summary = "用户登录")
-    @PostMapping("/login")
-    public BaseResponse<UserInfoCommonResVo> doLogin(@RequestBody @Valid UserLoginReqVo reqVo, HttpServletRequest request) {
-        return R.success(userService.doLogin(reqVo, request));
-    }
+  @Operation(summary = "用户登录")
+  @PostMapping("/login")
+  public BaseResponse<UserInfoCommonResVo> doLogin(
+      @RequestBody @Valid UserLoginReqVo reqVo, HttpServletRequest request) {
+    return R.success(userService.doLogin(reqVo, request));
+  }
 
-    @Operation(summary = "获取用户信息")
-    @GetMapping
-    public BaseResponse<UserInfoCommonResVo> getUserInfo(HttpServletRequest request) {
-        return R.success(userService.getUserVo(request));
-    }
+  @Operation(summary = "获取用户信息")
+  @GetMapping
+  public BaseResponse<UserInfoCommonResVo> getUserInfo(HttpServletRequest request) {
+    return R.success(userService.getUserVo(request));
+  }
 
-    @Operation(summary = "通过 id 获取用户信息")
-    @GetMapping("/{id}")
-    public BaseResponse<UserInfoCommonResVo> getUserInfoById(@PathVariable Long id) {
-        return R.success(userService.getUserVo(id));
-    }
+  @Operation(summary = "通过 id 获取用户信息")
+  @GetMapping("/{id}")
+  public BaseResponse<UserInfoCommonResVo> getUserInfoById(@PathVariable Long id) {
+    return R.success(userService.getUserVo(id));
+  }
 
-    @Operation(summary = "退出登录")
-    @PostMapping("/logout")
-    public BaseResponse<Void> doLogout(HttpServletRequest request) {
-        userService.doLogout(request);
-        return R.success();
-    }
+  @Operation(summary = "退出登录")
+  @PostMapping("/logout")
+  public BaseResponse<Void> doLogout(HttpServletRequest request) {
+    userService.doLogout(request);
+    return R.success();
+  }
 
-    @Operation(summary = "修改用户信息")
-    @PostMapping
-    public BaseResponse<UserInfoCommonResVo> updateUserInfo(@Valid @RequestBody UserUpdateReqVo updateReqVo) {
-        userService.updateById(updateReqVo.toUser());
-        return R.success(userService.getUserVo(updateReqVo.getId()));
-    }
+  @Operation(summary = "修改用户信息")
+  @PostMapping
+  public BaseResponse<UserInfoCommonResVo> updateUserInfo(
+      @Valid @RequestBody UserUpdateReqVo updateReqVo) {
+    userService.updateById(updateReqVo.toUser());
+    return R.success(userService.getUserVo(updateReqVo.getId()));
+  }
 
-    @Operation(summary = "新增用户(支持批量)")
-    @AuthRole
-    @PutMapping("/add")
-    public PageResponse<UserAddResVo> adminAddByAccount(@RequestBody List<UserAddReqVo> waitAddList) {
-        return R.list(userService.saveBatch(waitAddList));
-    }
+  @Operation(summary = "新增用户(支持批量)")
+  @AuthRole
+  @PutMapping("/add")
+  public PageResponse<UserAddResVo> adminAddByAccount(@RequestBody List<UserAddReqVo> waitAddList) {
+    return R.list(userService.saveBatch(waitAddList));
+  }
 
-    @Operation(summary = "新增用户(支持批量)")
-    @AuthRole
-    @PutMapping("/add/{size}")
-    public PageResponse<UserAddResVo> adminAddBySize(@PathVariable Integer size) {
-        return R.list(userService.saveBatch(size));
-    }
+  @Operation(summary = "新增用户(支持批量)")
+  @AuthRole
+  @PutMapping("/add/{size}")
+  public PageResponse<UserAddResVo> adminAddBySize(@PathVariable Integer size) {
+    return R.list(userService.saveBatch(size));
+  }
 
-    @Operation(summary = "停用账号")
-    @AuthRole
-    @PutMapping("/disable/{disableId}")
-    public BaseResponse<Void> adminDisable(@PathVariable Long disableId) {
-        userService.doDisable(disableId);
-        return R.success();
-    }
+  @Operation(summary = "停用账号")
+  @AuthRole
+  @PutMapping("/disable/{disableId}")
+  public BaseResponse<Void> adminDisable(@PathVariable Long disableId) {
+    userService.doDisable(disableId);
+    return R.success();
+  }
 
-    @Operation(summary = "获取用户信息(完整)")
-    @AuthRole
-    @GetMapping("/{id}/admin")
-    public BaseResponse<UserInfoAdminResVo> adminGetUserInfo(@PathVariable Long id) {
-        return R.success(BeanUtil.copyProperties(userService.getById(id), UserInfoAdminResVo.class));
-    }
+  @Operation(summary = "获取用户信息(完整)")
+  @AuthRole
+  @GetMapping("/{id}/admin")
+  public BaseResponse<UserInfoAdminResVo> adminGetUserInfo(@PathVariable Long id) {
+    return R.success(BeanUtil.copyProperties(userService.getById(id), UserInfoAdminResVo.class));
+  }
 
-    @Operation(summary = "获取用户列表")
-    @AuthRole
-    @GetMapping("/list")
-    public PageResponse<UserInfoAdminResVo> adminGetList(@Valid UserQueryReqVo queryReqVo) {
-        return R.list(userService.getList(queryReqVo));
-    }
+  @Operation(summary = "获取用户列表")
+  @AuthRole
+  @GetMapping("/list")
+  public PageResponse<UserInfoAdminResVo> adminGetList(@Valid UserQueryReqVo queryReqVo) {
+    return R.list(userService.getList(queryReqVo));
+  }
 }

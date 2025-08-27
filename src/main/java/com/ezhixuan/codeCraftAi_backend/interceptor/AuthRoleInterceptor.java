@@ -21,29 +21,45 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 
+/**
+ * 权限角色拦截器
+ * 用于拦截带有@AuthRole注解的方法，验证用户是否具有相应的角色权限
+ *
+ * @author ezhixuan
+ * @version 0.0.1beta
+ */
 @Aspect
 @Component
 @RequiredArgsConstructor
 public class AuthRoleInterceptor {
 
-    private final SysUserService userService;
+  private final SysUserService userService;
 
-    @Around("@annotation(authRole)")
-    @SneakyThrows
-    public Object doInterceptor(ProceedingJoinPoint joinPoint, AuthRole authRole) {
-        // 获取用户信息
-        RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
-        HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
-        UserInfoCommonResVo userVo = userService.getUserVo(request);
-        if (Objects.isNull(userVo)) {
-            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
-        }
-        // 判断权限是否一致
-        UserRoleEnum needRoleEnum = authRole.role();
-        UserRoleEnum userRoleEnum = UserRoleEnum.getByRole(userVo.getRole());
-        if (!Objects.equals(needRoleEnum, userRoleEnum)) {
-            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
-        }
-        return joinPoint.proceed();
+  /**
+   * 拦截处理方法
+   * 拦截带有@AuthRole注解的方法，验证用户角色权限
+   *
+   * @param joinPoint 连接点对象
+   * @param authRole 权限角色注解
+   * @return 方法执行结果
+   * @throws Throwable 方法执行异常
+   */
+  @Around("@annotation(authRole)")
+  @SneakyThrows
+  public Object doInterceptor(ProceedingJoinPoint joinPoint, AuthRole authRole) {
+    // 获取用户信息
+    RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();
+    HttpServletRequest request = ((ServletRequestAttributes) requestAttributes).getRequest();
+    UserInfoCommonResVo userVo = userService.getUserVo(request);
+    if (Objects.isNull(userVo)) {
+      throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
     }
+    // 判断权限是否一致
+    UserRoleEnum needRoleEnum = authRole.role();
+    UserRoleEnum userRoleEnum = UserRoleEnum.getByRole(userVo.getRole());
+    if (!Objects.equals(needRoleEnum, userRoleEnum)) {
+      throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+    }
+    return joinPoint.proceed();
+  }
 }

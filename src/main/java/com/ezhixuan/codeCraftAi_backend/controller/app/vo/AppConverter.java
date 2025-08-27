@@ -6,11 +6,11 @@ import cn.hutool.core.bean.BeanUtil;
 
 public abstract class AppConverter {
 
-    public SysApp toEntity() {
-        return BeanUtil.copyProperties(this, SysApp.class);
-    }
+  public SysApp toEntity() {
+    return BeanUtil.copyProperties(this, SysApp.class);
+  }
 
-    public void build(SysApp sysApp) {
-        BeanUtil.copyProperties(sysApp, this);
-    }
+  public void build(SysApp sysApp) {
+    BeanUtil.copyProperties(sysApp, this);
+  }
 }
