@@ -22,7 +22,7 @@ public class FileSaveTool {
       @P("文件内容") String content,
       @ToolMemoryId long memoryId) {
     try {
-      String path = PathUtil.buildPath(PathUtil.TEMP_DIR, CodeGenTypeEnum.VUE_PROJECT, memoryId);
+      String path = PathUtil.buildPath(PathUtil.ORIGINAL_DIR, CodeGenTypeEnum.VUE_PROJECT, memoryId);
       path = path + File.separator + relativeFilePath;
       FileUtil.writeUtf8String(content, path);
       return String.format("文件%s写入成功", relativeFilePath);

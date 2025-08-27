@@ -28,7 +28,7 @@ public class BuildExecutor {
       case HTML, HTML_MULTI_FILE -> true;
       case VUE_PROJECT ->
           VUE_PROJECT_BUILDER.build(
-              PathUtil.buildPath(PathUtil.TEMP_DIR, codeGenTypeEnum, appId), async);
+              PathUtil.buildPath(PathUtil.ORIGINAL_DIR, codeGenTypeEnum, appId), async);
     };
   }
 

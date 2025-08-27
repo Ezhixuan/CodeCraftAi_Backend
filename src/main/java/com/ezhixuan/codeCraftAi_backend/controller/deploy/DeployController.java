@@ -1,14 +1,9 @@
 package com.ezhixuan.codeCraftAi_backend.controller.deploy;
 
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
 import com.ezhixuan.codeCraftAi_backend.common.BaseResponse;
 import com.ezhixuan.codeCraftAi_backend.common.R;
 import com.ezhixuan.codeCraftAi_backend.controller.deploy.vo.DeployStatusVo;
 import com.ezhixuan.codeCraftAi_backend.service.IDeployService;
-import com.ezhixuan.codeCraftAi_backend.service.SysAppService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,6 +11,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/deploy")
@@ -25,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DeployController {
 
-    private final SysAppService appService;
     private final IDeployService deployService;
 
     @Operation(summary = "部署静态资源")

@@ -25,7 +25,7 @@ public abstract class FileSaverTemplate<T> {
         Long appId = saverDto.getAppId();
 
         validate(aiChatDto);
-        String baseDirPath = PathUtil.buildPath(PathUtil.TEMP_DIR, getCodeType(), appId);
+        String baseDirPath = PathUtil.buildPath(PathUtil.ORIGINAL_DIR, getCodeType(), appId);
         doSave(aiChatDto, baseDirPath);
         return FileUtil.file(baseDirPath);
     }

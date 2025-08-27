@@ -3,6 +3,7 @@ package com.ezhixuan.codeCraftAi_backend.service.impl;
 import cn.hutool.core.io.FileUtil;
 import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
 import com.ezhixuan.codeCraftAi_backend.controller.deploy.vo.DeployStatusVo;
+import com.ezhixuan.codeCraftAi_backend.core.builder.BuildExecutor;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
@@ -18,9 +19,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
-import static cn.hutool.core.io.FileUtil.copyFilesFromDir;
-import static cn.hutool.core.io.FileUtil.file;
+import static cn.hutool.core.io.FileUtil.*;
 import static java.util.Objects.isNull;
 
 @Service
@@ -31,6 +32,7 @@ public class IDeployServiceImpl implements IDeployService {
     private SysAppService appService;
 
     @Override
+    @Deprecated
     public String preDeploy(Long appId) {
         SysApp sysApp = getByAppId(appId);
         String deployKey = getDeployKey(sysApp);
@@ -41,19 +43,27 @@ public class IDeployServiceImpl implements IDeployService {
             log.error("应用id:{}存在代码生成类型错误,请检查 codeGenType:{}", appId, sysApp.getCodeGenType());
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "代码生成类型错误");
         }
-        String sourcePath = PathUtil.buildPath(PathUtil.TEMP_DIR, codeGenTypeEnum, appId);
+        String sourcePath = PathUtil.buildPath(PathUtil.ORIGINAL_DIR, codeGenTypeEnum, appId);
         String deployPath = PathUtil.buildPath(PathUtil.DEPLOY_DIR, codeGenTypeEnum, deployKey);
         File sourceFile = file(sourcePath);
         File deployFile = file(deployPath);
-        copyFilesFromDir(sourceFile, deployFile, true);
+
+        FileUtil.clean(deployFile);
+        copyContent(sourceFile, deployFile, true);
+        BuildExecutor.build(deployPath, codeGenTypeEnum, false);
         // 更新部署时间
         sysApp.setDeployTime(LocalDateTime.now());
         appService.updateById(sysApp);
         log.info("应用 {} 预部署成功，路径: {}", appId, deployPath);
+
+        if (Objects.equals(codeGenTypeEnum,CodeGenTypeEnum.VUE_PROJECT)) {
+            return deployPath.substring(deployPath.lastIndexOf("/") + 1) + "/dist";
+        }
         return deployPath.substring(deployPath.lastIndexOf("/") + 1);
     }
 
     @Override
+    @Deprecated
     @SneakyThrows
     public void redirectToStaticResource(String deployKey, HttpServletResponse response) {
         // 直接检查静态资源文件是否存在
@@ -81,7 +91,7 @@ public class IDeployServiceImpl implements IDeployService {
         // 检查临时文件是否存在
         CodeGenTypeEnum codeGenTypeEnum = CodeGenTypeEnum.getEnumByValue(sysApp.getCodeGenType());
         if (codeGenTypeEnum != null) {
-            String tempPath = PathUtil.buildPath(PathUtil.TEMP_DIR, codeGenTypeEnum, appId);
+            String tempPath = PathUtil.buildPath(PathUtil.ORIGINAL_DIR, codeGenTypeEnum, appId);
             File tempFile = FileUtil.file(tempPath);
             statusVo.setTempFileExists(tempFile.exists() && tempFile.listFiles() != null && tempFile.listFiles().length > 0);
 
