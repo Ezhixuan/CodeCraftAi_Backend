@@ -1,19 +1,16 @@
 package com.ezhixuan.codeCraftAi_backend.controller.app.vo;
 
+import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoCommonResVo;
+import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoCommonResVo;
-import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class AppInfoCommonResVo extends AppConverter implements Serializable {
+public class AppInfoCommonResVo implements Serializable {
 
   @Serial private static final long serialVersionUID = -863368428809848433L;
 
@@ -41,8 +38,19 @@ public class AppInfoCommonResVo extends AppConverter implements Serializable {
   @Schema(description = "用户信息")
   private UserInfoCommonResVo userInfo;
 
-  public void build(SysApp sysApp, UserInfoCommonResVo userInfo) {
-    super.build(sysApp);
-    this.userInfo = userInfo;
+  public static AppInfoCommonResVo build(SysApp sysApp, UserInfoCommonResVo userInfo) {
+    if (sysApp == null) {
+      return null;
+    }
+    AppInfoCommonResVo appInfoCommonResVo = new AppInfoCommonResVo();
+    appInfoCommonResVo.setId(sysApp.getId());
+    appInfoCommonResVo.setName(sysApp.getName());
+    appInfoCommonResVo.setCover(sysApp.getCover());
+    appInfoCommonResVo.setDeployTime(sysApp.getDeployTime());
+    appInfoCommonResVo.setUserId(sysApp.getUserId());
+    appInfoCommonResVo.setCreateTime(sysApp.getCreateTime());
+    appInfoCommonResVo.setUpdateTime(sysApp.getUpdateTime());
+    appInfoCommonResVo.setUserInfo(userInfo);
+    return appInfoCommonResVo;
   }
 }

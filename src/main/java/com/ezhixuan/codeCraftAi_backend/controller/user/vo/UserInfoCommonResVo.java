@@ -1,5 +1,6 @@
 package com.ezhixuan.codeCraftAi_backend.controller.user.vo;
 
+import com.ezhixuan.codeCraftAi_backend.domain.entity.SysUser;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -41,4 +42,21 @@ public class UserInfoCommonResVo implements Serializable {
 
   @Schema(description = "用户角色")
   private String role;
+
+  public static UserInfoCommonResVo build(SysUser sysUser) {
+    if (sysUser == null) {
+      return null;
+    }
+    UserInfoCommonResVo userInfoCommonResVo = new UserInfoCommonResVo();
+    userInfoCommonResVo.setId(sysUser.getId());
+    userInfoCommonResVo.setAccount(sysUser.getAccount());
+    userInfoCommonResVo.setName(sysUser.getName());
+    userInfoCommonResVo.setAvatar(sysUser.getAvatar());
+    userInfoCommonResVo.setProfile(sysUser.getProfile());
+    userInfoCommonResVo.setEmail(sysUser.getEmail());
+    userInfoCommonResVo.setCreateTime(sysUser.getCreateTime());
+    userInfoCommonResVo.setUpdateTime(sysUser.getUpdateTime());
+    userInfoCommonResVo.setRole(sysUser.getRole());
+    return userInfoCommonResVo;
+  }
 }

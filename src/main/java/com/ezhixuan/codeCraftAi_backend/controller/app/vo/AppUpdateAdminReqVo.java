@@ -1,18 +1,17 @@
 package com.ezhixuan.codeCraftAi_backend.controller.app.vo;
 
-import java.io.Serial;
-import java.io.Serializable;
-
+import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
-@EqualsAndHashCode(callSuper = true)
+import java.io.Serial;
+import java.io.Serializable;
+
 @Data
-public class AppUpdateAdminReqVo extends AppConverter implements Serializable {
+public class AppUpdateAdminReqVo implements Serializable {
 
   @Serial private static final long serialVersionUID = -8337583786116753335L;
 
@@ -33,4 +32,14 @@ public class AppUpdateAdminReqVo extends AppConverter implements Serializable {
   @Min(value = 0, message = "应用优先级最小为 0")
   @Schema(description = "优先级")
   private Integer priority;
+
+  public SysApp toEntity() {
+    SysApp sysApp = new SysApp();
+    sysApp.setId(id);
+    sysApp.setName(name);
+    sysApp.setCover(cover);
+    sysApp.setDeployKey(deployKey);
+    sysApp.setPriority(priority);
+    return sysApp;
+  }
 }

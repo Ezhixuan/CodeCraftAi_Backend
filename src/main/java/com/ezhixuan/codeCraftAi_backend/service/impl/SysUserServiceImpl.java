@@ -1,6 +1,5 @@
 package com.ezhixuan.codeCraftAi_backend.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.ezhixuan.codeCraftAi_backend.common.PageRequest;
 import com.ezhixuan.codeCraftAi_backend.config.prop.SystemProp;
 import com.ezhixuan.codeCraftAi_backend.controller.user.vo.*;
@@ -94,7 +93,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
     if (isNull(user)) {
       throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
     }
-    return BeanUtil.copyProperties(user, UserInfoCommonResVo.class);
+    return UserInfoCommonResVo.build(user);
   }
 
   @Override
@@ -127,7 +126,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
       return Collections.emptyList();
     }
     List<SysUser> list =
-        waitAddList.stream().map(add -> add.toUser(prop.getDefaultPassword())).toList();
+        waitAddList.stream().map(add -> add.toEntity(prop.getDefaultPassword())).toList();
     saveBatch(list);
     return toAddResVo(list);
   }
@@ -166,7 +165,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
   @Override
   public Page<UserInfoAdminResVo> getList(UserQueryReqVo queryReqVo) {
     return PageRequest.convert(
-        page(queryReqVo.toPage(), getQueryWrapper(queryReqVo)), UserInfoAdminResVo.class);
+        page(queryReqVo.toPage(), getQueryWrapper(queryReqVo)), UserInfoAdminResVo::build);
   }
 
   @Override
@@ -187,7 +186,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
     }
     List<SysUser> userList = listByIds(userIdList);
     return userList.stream()
-        .map(user -> BeanUtil.copyProperties(user, UserInfoAdminResVo.class))
+        .map(UserInfoAdminResVo::build)
         .collect(Collectors.toMap(UserInfoAdminResVo::getId, Function.identity()));
   }
 

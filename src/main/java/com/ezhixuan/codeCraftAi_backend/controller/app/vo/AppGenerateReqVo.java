@@ -10,16 +10,14 @@ import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
 import java.io.Serializable;
 
 import static java.util.Objects.isNull;
 
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class AppGenerateReqVo extends AppConverter implements Serializable {
+public class AppGenerateReqVo implements Serializable {
 
   @Serial private static final long serialVersionUID = 4237947024329138431L;
 
@@ -31,7 +29,6 @@ public class AppGenerateReqVo extends AppConverter implements Serializable {
   @Schema(description = "代码生成类型")
   private String codeGenType;
 
-  @Override
   public SysApp toEntity() {
     CodeGenTypeEnum enumByValue = CodeGenTypeEnum.getEnumByValue(codeGenType);
     if (isNull(enumByValue)) {

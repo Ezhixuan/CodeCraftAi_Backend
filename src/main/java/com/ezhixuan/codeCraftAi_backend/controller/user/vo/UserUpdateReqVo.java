@@ -39,7 +39,7 @@ public class UserUpdateReqVo implements Serializable {
   @Schema(description = "用户邮箱")
   private String email;
 
-  public SysUser toUser() {
+  public SysUser tuEntity() {
     if (!Objects.equals(id, UserUtil.getLoginUserId())) {
       throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
     }

@@ -31,12 +31,17 @@ public class ChatInfoResVo implements Serializable {
   @Schema(description = "创建时间")
   private LocalDateTime createTime;
 
-  public ChatInfoResVo(SysChatHistory sysChatHistory) {
-    this.id = sysChatHistory.getId();
-    this.message = sysChatHistory.getMessage();
-    this.messageType = sysChatHistory.getMessageType();
-    this.appId = sysChatHistory.getAppId();
-    this.userId = sysChatHistory.getUserId();
-    this.createTime = sysChatHistory.getCreateTime();
+  public static ChatInfoResVo build(SysChatHistory sysChatHistory) {
+    if (sysChatHistory == null) {
+      return null;
+    }
+    ChatInfoResVo chatInfoResVo = new ChatInfoResVo();
+    chatInfoResVo.setId(sysChatHistory.getId());
+    chatInfoResVo.setMessage(sysChatHistory.getMessage());
+    chatInfoResVo.setMessageType(sysChatHistory.getMessageType());
+    chatInfoResVo.setAppId(sysChatHistory.getAppId());
+    chatInfoResVo.setUserId(sysChatHistory.getUserId());
+    chatInfoResVo.setCreateTime(sysChatHistory.getCreateTime());
+    return chatInfoResVo;
   }
 }

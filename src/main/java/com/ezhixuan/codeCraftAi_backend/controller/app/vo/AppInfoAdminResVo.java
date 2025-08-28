@@ -1,19 +1,16 @@
 package com.ezhixuan.codeCraftAi_backend.controller.app.vo;
 
+import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoAdminResVo;
+import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
-import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoAdminResVo;
-import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class AppInfoAdminResVo extends AppConverter implements Serializable {
+public class AppInfoAdminResVo implements Serializable {
 
   @Serial private static final long serialVersionUID = 5449833456696378220L;
 
@@ -53,8 +50,23 @@ public class AppInfoAdminResVo extends AppConverter implements Serializable {
   @Schema(description = "用户信息")
   private UserInfoAdminResVo userInfo;
 
-  public void build(SysApp sysApp, UserInfoAdminResVo userInfo) {
-    super.build(sysApp);
-    this.userInfo = userInfo;
+  public static AppInfoAdminResVo build(SysApp sysApp, UserInfoAdminResVo userInfo) {
+    if (sysApp == null) {
+      return null;
+    }
+    AppInfoAdminResVo appInfoAdminResVo = new AppInfoAdminResVo();
+    appInfoAdminResVo.setId(sysApp.getId());
+    appInfoAdminResVo.setName(sysApp.getName());
+    appInfoAdminResVo.setCover(sysApp.getCover());
+    appInfoAdminResVo.setInitPrompt(sysApp.getInitPrompt());
+    appInfoAdminResVo.setCodeGenType(sysApp.getCodeGenType());
+    appInfoAdminResVo.setDeployKey(sysApp.getDeployKey());
+    appInfoAdminResVo.setDeployTime(sysApp.getDeployTime());
+    appInfoAdminResVo.setPriority(sysApp.getPriority());
+    appInfoAdminResVo.setUserId(sysApp.getUserId());
+    appInfoAdminResVo.setCreateTime(sysApp.getCreateTime());
+    appInfoAdminResVo.setUpdateTime(sysApp.getUpdateTime());
+    appInfoAdminResVo.setUserInfo(userInfo);
+    return appInfoAdminResVo;
   }
 }

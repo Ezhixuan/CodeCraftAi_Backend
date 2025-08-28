@@ -60,9 +60,7 @@ public class AppController {
   @GetMapping("/{id}")
   public BaseResponse<AppInfoCommonResVo> getInfo(@PathVariable Long id) {
     SysApp sysApp = appService.getById(id);
-    AppInfoCommonResVo appInfoCommonResVo = new AppInfoCommonResVo();
-    appInfoCommonResVo.build(sysApp, userService.getUserVo(sysApp.getUserId()));
-    return R.success(appInfoCommonResVo);
+    return R.success(AppInfoCommonResVo.build(sysApp, userService.getUserVo(sysApp.getUserId())));
   }
 
   @Operation(summary = "应用预览")

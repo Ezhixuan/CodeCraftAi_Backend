@@ -1,6 +1,5 @@
 package com.ezhixuan.codeCraftAi_backend.controller.user;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.ezhixuan.codeCraftAi_backend.annotation.AuthRole;
 import com.ezhixuan.codeCraftAi_backend.common.BaseResponse;
 import com.ezhixuan.codeCraftAi_backend.common.PageResponse;
@@ -62,7 +61,7 @@ public class UserController {
   @PostMapping
   public BaseResponse<UserInfoCommonResVo> updateUserInfo(
       @Valid @RequestBody UserUpdateReqVo updateReqVo) {
-    userService.updateById(updateReqVo.toUser());
+    userService.updateById(updateReqVo.tuEntity());
     return R.success(userService.getUserVo(updateReqVo.getId()));
   }
 
@@ -92,7 +91,7 @@ public class UserController {
   @AuthRole
   @GetMapping("/{id}/admin")
   public BaseResponse<UserInfoAdminResVo> adminGetUserInfo(@PathVariable Long id) {
-    return R.success(BeanUtil.copyProperties(userService.getById(id), UserInfoAdminResVo.class));
+    return R.success(UserInfoAdminResVo.build(userService.getById(id)));
   }
 
   @Operation(summary = "获取用户列表")

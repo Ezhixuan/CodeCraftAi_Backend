@@ -129,11 +129,7 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     }
     return PageRequest.convert(
         sysAppPage,
-        sysApp -> {
-          AppInfoCommonResVo appInfoCommonResVo = new AppInfoCommonResVo();
-          appInfoCommonResVo.build(sysApp, userInfoMap.get(sysApp.getUserId()));
-          return appInfoCommonResVo;
-        });
+        sysApp -> AppInfoCommonResVo.build(sysApp, userInfoMap.get(sysApp.getUserId())));
   }
 
   @Override
@@ -143,12 +139,7 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
       return new Page<>();
     }
     return PageRequest.convert(
-        sysAppPage,
-        sysApp -> {
-          AppInfoAdminResVo appInfoAdminResVo = new AppInfoAdminResVo();
-          appInfoAdminResVo.build(sysApp, userInfoMap.get(sysApp.getUserId()));
-          return appInfoAdminResVo;
-        });
+        sysAppPage, sysApp -> AppInfoAdminResVo.build(sysApp, userInfoMap.get(sysApp.getUserId())));
   }
 
   /**

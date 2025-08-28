@@ -45,7 +45,7 @@ public class SysChatHistoryServiceImpl extends ServiceImpl<SysChatHistoryMapper,
   @Override
   public Page<ChatInfoResVo> list(ChatQueryReqVo reqVo) {
     QueryWrapper queryWrapper = getQueryWrapper(reqVo);
-    return PageRequest.convert(page(reqVo.toPage(), queryWrapper), ChatInfoResVo::new);
+    return PageRequest.convert(page(reqVo.toPage(), queryWrapper), ChatInfoResVo::build);
   }
 
   @Override

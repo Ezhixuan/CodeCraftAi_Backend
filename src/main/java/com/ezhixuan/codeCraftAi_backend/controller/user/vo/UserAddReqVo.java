@@ -4,7 +4,6 @@ import cn.hutool.core.util.RandomUtil;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysUser;
 import com.ezhixuan.codeCraftAi_backend.domain.enums.UserRoleEnum;
 import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -24,8 +23,7 @@ public class UserAddReqVo implements Serializable {
   @Schema(description = "用户昵称")
   private String name;
 
-  @JsonIgnore
-  public SysUser toUser(String defaultPassword) {
+  public SysUser toEntity(String defaultPassword) {
     if (!hasText(account)) {
       account = RandomUtil.randomString(10);
     }

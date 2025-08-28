@@ -1,6 +1,5 @@
 package com.ezhixuan.codeCraftAi_backend.controller.app;
 
-import cn.hutool.core.bean.BeanUtil;
 import com.ezhixuan.codeCraftAi_backend.annotation.AuthRole;
 import com.ezhixuan.codeCraftAi_backend.common.BaseResponse;
 import com.ezhixuan.codeCraftAi_backend.common.PageResponse;
@@ -38,10 +37,9 @@ public class AdminAppController {
   @GetMapping("/{id}")
   public BaseResponse<AppInfoAdminResVo> adminGetInfo(@PathVariable Long id) {
     SysApp sysApp = appService.getById(id);
-    AppInfoAdminResVo appInfoAdminResVo = new AppInfoAdminResVo();
-    appInfoAdminResVo.build(
-        sysApp, BeanUtil.copyProperties(userService.getById(id), UserInfoAdminResVo.class));
-    return R.success(appInfoAdminResVo);
+    return R.success(
+        AppInfoAdminResVo.build(
+            sysApp, UserInfoAdminResVo.build(userService.getById(sysApp.getUserId()))));
   }
 
   @Operation(summary = "获取用户应用列表")
