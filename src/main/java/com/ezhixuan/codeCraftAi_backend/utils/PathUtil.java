@@ -1,6 +1,5 @@
 package com.ezhixuan.codeCraftAi_backend.utils;
 
-import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
@@ -46,7 +45,6 @@ public class PathUtil {
     if (path.startsWith("file:")) {
       path = path.replace("file:", "");
     }
-    FileUtil.mkdir(path);
     return path;
   }
 }

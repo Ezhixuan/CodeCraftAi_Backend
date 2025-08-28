@@ -215,11 +215,11 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     String targetPath = PathUtil.buildPath(PathUtil.PREVIEW_DIR, codeGenType, appId);
     if (!UserUtil.isAdmin() || !UserUtil.isMe(app.getUserId())) {
       // 不是本人只查看是否存在
-      return targetPath.replace(PathUtil.PREVIEW_DIR, "");
+      return targetPath.substring(targetPath.lastIndexOf("/") + 1);
     }
     String sourcePath = PathUtil.buildPath(PathUtil.TEMP_DIR, codeGenType, appId);
-    File sourceDir = FileUtil.file(sourcePath);
-    if (reBuild || !sourceDir.exists()) {
+    if (reBuild || !FileUtil.exist(sourcePath)) {
+      File sourceDir = FileUtil.file(sourcePath);
       // copy original 的文件
       String originalPath = PathUtil.buildPath(PathUtil.ORIGINAL_DIR, codeGenType, appId);
       File originalDir = FileUtil.file(originalPath);
@@ -231,20 +231,24 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
       if (Objects.equals(codeGenType, VUE_PROJECT)) {
         // copy 过来需要等待重新部署
         BuildExecutor.build(sourcePath, codeGenType, false);
-        sourceDir = FileUtil.file(sourceDir, "/dist");
       }
+    }
+
+    File sourceDir = FileUtil.file(sourcePath);
+    if (Objects.equals(codeGenType, VUE_PROJECT)) {
+      sourceDir = FileUtil.file(sourceDir, "/dist");
     }
 
     File targetDir = FileUtil.file(targetPath);
     FileUtil.clean(targetDir);
     FileUtil.copyContent(sourceDir, targetDir, true);
 
-    return targetPath.replace(PathUtil.PREVIEW_DIR, "");
+    return targetPath.substring(targetPath.lastIndexOf("/") + 1);
   }
 
   @Override
   public void redirect(String previewKey, HttpServletResponse response) {
-    String redirectUrl = "/api/static/preview/" + previewKey + "/index.html";
+    String redirectUrl = "/api/static/" + previewKey + "/index.html";
     try {
       response.sendRedirect(redirectUrl);
     } catch (IOException e) {
