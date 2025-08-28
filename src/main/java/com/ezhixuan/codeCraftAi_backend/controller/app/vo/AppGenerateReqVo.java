@@ -4,8 +4,6 @@ import cn.hutool.core.util.IdUtil;
 import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
 import com.ezhixuan.codeCraftAi_backend.domain.constant.AppConstant;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
-import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
-import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
 import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -13,8 +11,6 @@ import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
-
-import static java.util.Objects.isNull;
 
 @Data
 public class AppGenerateReqVo implements Serializable {
@@ -30,10 +26,7 @@ public class AppGenerateReqVo implements Serializable {
   private String codeGenType;
 
   public SysApp toEntity() {
-    CodeGenTypeEnum enumByValue = CodeGenTypeEnum.getEnumByValue(codeGenType);
-    if (isNull(enumByValue)) {
-      throw new BusinessException(ErrorCode.PARAMS_ERROR, "代码生成类型错误");
-    }
+    CodeGenTypeEnum enumByValue = CodeGenTypeEnum.getByValue(codeGenType);
     SysApp entity = new SysApp();
     entity.setName(initPrompt.substring(0, Math.min(initPrompt.length(), 12)));
     entity.setInitPrompt(initPrompt);

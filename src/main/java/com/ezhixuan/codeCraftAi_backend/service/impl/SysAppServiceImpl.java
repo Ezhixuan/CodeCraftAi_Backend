@@ -1,6 +1,11 @@
 package com.ezhixuan.codeCraftAi_backend.service.impl;
 
+import static com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum.VUE_PROJECT;
+import static java.util.Objects.isNull;
+import static org.springframework.util.CollectionUtils.isEmpty;
+
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IORuntimeException;
 import cn.hutool.json.JSONUtil;
 import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
 import com.ezhixuan.codeCraftAi_backend.common.PageRequest;
@@ -25,21 +30,16 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
-
-import static com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum.VUE_PROJECT;
-import static java.util.Objects.isNull;
-import static org.springframework.util.CollectionUtils.isEmpty;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.codec.ServerSentEvent;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * 服务层实现。
@@ -72,7 +72,7 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
             .appId(appId)
             .build());
     StringBuilder contentBuilder = new StringBuilder();
-    CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getEnumByValue(sysApp.getCodeGenType());
+    CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getByValue(sysApp.getCodeGenType());
     return codeCraftFacade
         .chatAndSaveStream(message, codeGenType, appId)
         .doOnNext(contentBuilder::append)
@@ -196,19 +196,45 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     if (isNull(app)) {
       throw new BusinessException(ErrorCode.PARAMS_ERROR, "应用不存在");
     }
-    CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getEnumByValue(app.getCodeGenType());
-    if (isNull(codeGenType)) {
-      log.error("应用id:{}存在代码生成类型错误,请检查 codeGenType:{}", appId, app.getCodeGenType());
-      throw new BusinessException(ErrorCode.SYSTEM_ERROR, "代码生成类型错误");
-    }
+    CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getByValue(app.getCodeGenType());
+
     String targetPath = PathUtil.buildPath(PathUtil.PREVIEW_DIR, codeGenType, appId);
     if (!UserUtil.isAdmin() || !UserUtil.isMe(app.getUserId())) {
       // 不是本人只查看是否存在
       return targetPath.substring(targetPath.lastIndexOf("/") + 1);
     }
+
     String sourcePath = PathUtil.buildPath(PathUtil.TEMP_DIR, codeGenType, appId);
-    if (reBuild || !FileUtil.exist(sourcePath)) {
-      File sourceDir = FileUtil.file(sourcePath);
+    String deployPath = PathUtil.buildPath(PathUtil.DEPLOY_DIR, codeGenType, appId);
+
+    if (reBuild) {
+      copyAndBuildFromOriginal(appId, sourcePath, codeGenType);
+    } else if (FileUtil.exist(deployPath)) {
+      // 一般部署都是完整内容文件,但是为了系统完整还是需要进判断
+      if (FileUtil.exist(deployPath, "index.html")) {
+        return copyFromSourcePath(deployPath, targetPath, codeGenType);
+      }
+      copyAndBuildFromOriginal(appId, sourcePath, codeGenType);
+    } else if (!FileUtil.exist(sourcePath)) {
+      copyAndBuildFromOriginal(appId, sourcePath, codeGenType);
+    }
+
+    return copyFromSourcePath(sourcePath, targetPath, codeGenType);
+  }
+
+  /**
+   * 从原始目录复制并构建项目 根据应用ID和代码生成类型从原始目录复制文件，并对Vue项目进行构建
+   *
+   * @param appId 应用ID
+   * @param targetPath 源路径
+   * @param codeGenType 代码生成类型枚举
+   * @return boolean 复制和构建是否成功
+   * @throws BusinessException 当文件不存在或复制失败时抛出业务异常
+   */
+  private boolean copyAndBuildFromOriginal(
+      Long appId, String targetPath, CodeGenTypeEnum codeGenType) {
+    try {
+      File sourceDir = FileUtil.file(targetPath);
       // copy original 的文件
       String originalPath = PathUtil.buildPath(PathUtil.ORIGINAL_DIR, codeGenType, appId);
       File originalDir = FileUtil.file(originalPath);
@@ -219,10 +245,25 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
       FileUtil.copyContent(originalDir, sourceDir, true);
       if (Objects.equals(codeGenType, VUE_PROJECT)) {
         // copy 过来需要等待重新部署
-        BuildExecutor.build(sourcePath, codeGenType, false);
+        return BuildExecutor.build(targetPath, codeGenType, false);
       }
+    } catch (IORuntimeException e) {
+      log.error("应用id:{}复制文件失败,请检查 targetPath:{}", appId, targetPath);
+      throw new BusinessException(ErrorCode.SYSTEM_ERROR, "文件复制失败");
     }
+    return true;
+  }
 
+  /**
+   * 从源路径复制文件到目标路径 根据代码生成类型处理不同的源目录，并将文件复制到目标路径
+   *
+   * @param sourcePath 源路径
+   * @param targetPath 目标路径
+   * @param codeGenType 代码生成类型枚举
+   * @return String 目标路径的最后一级目录名
+   */
+  private String copyFromSourcePath(
+      String sourcePath, String targetPath, CodeGenTypeEnum codeGenType) {
     File sourceDir = FileUtil.file(sourcePath);
     if (Objects.equals(codeGenType, VUE_PROJECT)) {
       sourceDir = FileUtil.file(sourceDir, "/dist");
@@ -231,7 +272,6 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     File targetDir = FileUtil.file(targetPath);
     FileUtil.clean(targetDir);
     FileUtil.copyContent(sourceDir, targetDir, true);
-
     return targetPath.substring(targetPath.lastIndexOf("/") + 1);
   }
 
@@ -254,11 +294,7 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     if (isNull(sysApp)) {
       throw new BusinessException(ErrorCode.PARAMS_ERROR, "应用不存在");
     }
-    CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getEnumByValue(sysApp.getCodeGenType());
-    if (isNull(codeGenType)) {
-      log.error("应用id:{}存在代码生成类型错误,请检查 codeGenType:{}", appId, sysApp.getCodeGenType());
-      throw new BusinessException(ErrorCode.SYSTEM_ERROR, "代码生成类型错误");
-    }
+    CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getByValue(sysApp.getCodeGenType());
 
     appStatusResVo.setDeployStatus(
         FileUtil.exist(PathUtil.buildPath(PathUtil.DEPLOY_DIR, codeGenType, appId))
@@ -276,5 +312,18 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
             : LoadingStatusEnum.ERROR);
 
     return appStatusResVo;
+  }
+
+  @Override
+  public String doDeploy(Long appId) {
+    SysApp sysApp = getById(appId);
+    if (isNull(sysApp)) {
+      throw new BusinessException(ErrorCode.PARAMS_ERROR, "应用不存在");
+    }
+    CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getByValue(sysApp.getCodeGenType());
+    String deployPath = PathUtil.buildPath(PathUtil.DEPLOY_DIR, codeGenType, appId);
+    FileUtil.clean(deployPath);
+    copyAndBuildFromOriginal(appId, deployPath, codeGenType);
+    return deployPath.substring(deployPath.lastIndexOf("/") + 1);
   }
 }

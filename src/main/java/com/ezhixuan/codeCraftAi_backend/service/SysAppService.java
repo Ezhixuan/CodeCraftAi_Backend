@@ -16,7 +16,8 @@ import java.util.Map;
  * 应用服务接口 提供应用相关的业务逻辑处理接口，包括代码生成、应用管理、预览部署等功能
  *
  * @author Ezhixuan
- * @version 0.0.1beta
+ * @since 0.0.1beta
+ * @version 0.0.2beta
  */
 public interface SysAppService extends IService<SysApp> {
 
@@ -77,6 +78,7 @@ public interface SysAppService extends IService<SysApp> {
   /**
    * 将文件复制到预览文件夹 将生成的代码文件复制到预览文件夹，用于预览展示
    *
+   * @since 0.0.2beta
    * @param appId 应用ID
    * @param reBuild 是否重新构建，只有应用用户为当前用户才可以进行
    * @return String 预览标识
@@ -86,6 +88,7 @@ public interface SysAppService extends IService<SysApp> {
   /**
    * 重定向到预览页面 根据预览标识重定向到对应的预览页面
    *
+   * @since 0.0.2beta
    * @param previewKey 预览标识
    * @param response HTTP响应对象
    */
@@ -94,8 +97,18 @@ public interface SysAppService extends IService<SysApp> {
   /**
    * 获取应用状态 根据应用ID获取应用的状态信息
    *
+   * @since 0.0.2beta
    * @param appId 应用ID
    * @return AppStatusResVo 应用状态信息
    */
   AppStatusResVo getStatus(Long appId);
+
+  /**
+   * 执行应用部署 根据应用ID执行应用的部署操作
+   *
+   * @param appId 应用ID
+   * @since 0.0.2beta
+   * @return String 访问路径
+   */
+  String doDeploy(Long appId);
 }

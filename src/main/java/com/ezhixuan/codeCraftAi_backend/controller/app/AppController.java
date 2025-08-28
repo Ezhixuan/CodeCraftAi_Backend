@@ -68,6 +68,12 @@ public class AppController {
     appService.redirect(previewKey, response);
   }
 
+  @Operation(summary = "应用部署")
+  @PutMapping("/deploy/{appId}")
+  public BaseResponse<String> doDeploy(@PathVariable("appId") Long appId) {
+    return R.success(appService.doDeploy(appId));
+  }
+
   @Operation(summary = "获取应用状态")
   @GetMapping("/status/{appId}")
   public BaseResponse<AppStatusResVo> getStatus(@PathVariable("appId") Long id) {

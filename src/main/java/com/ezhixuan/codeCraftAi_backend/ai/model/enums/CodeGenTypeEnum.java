@@ -1,10 +1,13 @@
 package com.ezhixuan.codeCraftAi_backend.ai.model.enums;
 
-import cn.hutool.core.util.ObjUtil;
+import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
+import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 @Getter
+@Slf4j
 public enum CodeGenTypeEnum {
 
     HTML("原生 HTML 模式", "html"),
@@ -28,15 +31,13 @@ public enum CodeGenTypeEnum {
      * @param value 枚举值的value
      * @return 枚举值
      */
-    public static CodeGenTypeEnum getEnumByValue(String value) {
-        if (ObjUtil.isEmpty(value)) {
-            return null;
-        }
+    public static CodeGenTypeEnum getByValue(String value) {
         for (CodeGenTypeEnum anEnum : CodeGenTypeEnum.values()) {
             if (anEnum.value.equals(value)) {
                 return anEnum;
             }
         }
-        return null;
+        log.error("存在代码生成类型错误,请检查 codeGenType:{}", value);
+        throw new BusinessException(ErrorCode.SYSTEM_ERROR, "代码生成类型错误");
     }
 }
