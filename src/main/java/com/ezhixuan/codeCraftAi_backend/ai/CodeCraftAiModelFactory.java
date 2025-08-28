@@ -16,6 +16,7 @@ import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.service.AiServices;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -44,15 +45,14 @@ public class CodeCraftAiModelFactory {
   private final SysChatHistoryService chatHistoryService;
 
   /** AI服务缓存 使用Caffeine缓存AI服务实例，提高性能并减少重复创建的开销 缓存最大容量为100，访问后10分钟过期，写入后30分钟过期 */
-  private final LoadingCache<Long, CodeCraftAiChatService> AI_SERVICE_CACHE =
+  private final LoadingCache<@NonNull Long, CodeCraftAiChatService> AI_SERVICE_CACHE =
       Caffeine.newBuilder()
           .maximumSize(100)
           .expireAfterAccess(Duration.ofMinutes(10))
           .expireAfterWrite(Duration.ofMinutes(30))
           .removalListener(
-              (key, value, cause) -> {
-                log.debug("缓存 AI 服务被移除，key: {}, value: {}, cause: {}", key, value, cause);
-              })
+              (key, value, cause) ->
+                  log.debug("缓存 AI 服务被移除，key: {}, value: {}, cause: {}", key, value, cause))
           .build(this::generateAiService);
 
   /**
@@ -150,15 +150,9 @@ public class CodeCraftAiModelFactory {
     messages.forEach(
         message -> {
           switch (MessageTypeEnum.getByType(message.getMessageType())) {
-            case MessageTypeEnum.AI -> {
-              chatMemory.add(AiMessage.from(message.getMessage()));
-            }
-            case MessageTypeEnum.USER -> {
-              chatMemory.add(UserMessage.from(message.getMessage()));
-            }
-            case null -> {
-              log.error("未知消息类型: {}", message.getMessageType());
-            }
+            case MessageTypeEnum.AI -> chatMemory.add(AiMessage.from(message.getMessage()));
+            case MessageTypeEnum.USER -> chatMemory.add(UserMessage.from(message.getMessage()));
+            case null -> log.error("未知消息类型: {}", message.getMessageType());
           }
         });
   }

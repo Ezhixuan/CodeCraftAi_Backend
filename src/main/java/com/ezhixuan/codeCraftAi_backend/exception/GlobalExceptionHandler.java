@@ -33,6 +33,7 @@ public class GlobalExceptionHandler {
     String errorMsg =
         bindingResult.getFieldErrors().stream()
             .map(DefaultMessageSourceResolvable::getDefaultMessage)
+            .filter(Objects::nonNull)
             .findFirst()
             .orElse("参数错误");
     return R.error(ErrorCode.PARAMS_ERROR, errorMsg);

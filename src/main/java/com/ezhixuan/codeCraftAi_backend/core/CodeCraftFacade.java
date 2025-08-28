@@ -67,9 +67,7 @@ public class CodeCraftFacade {
             chatService.chatHtmlCssScript(userMessage);
         yield FileSaverExecutor.executeSave(aiChatHtmlCssScriptResDto, codeGenType, appId);
       }
-      default -> {
-        throw new BusinessException(ErrorCode.PARAMS_ERROR, "请选择正确的代码生成模式");
-      }
+      default -> throw new BusinessException(ErrorCode.PARAMS_ERROR, "请选择正确的代码生成模式");
     };
   }
 
@@ -103,9 +101,6 @@ public class CodeCraftFacade {
       case VUE_PROJECT -> {
         TokenStream stringFlux = chatService.vueProjectStream(appId, userMessage);
         yield convertToFlux(stringFlux);
-      }
-      default -> {
-        throw new BusinessException(ErrorCode.PARAMS_ERROR, "请选择正确的代码生成模式");
       }
     };
   }
@@ -146,25 +141,23 @@ public class CodeCraftFacade {
    */
   private Flux<String> convertToFlux(TokenStream tokenStream) {
     return Flux.create(
-        sink -> {
-          tokenStream
-              .onPartialResponse(sink::next)
-              .beforeToolExecution(
-                  (beforeToolExecution) -> {
-                    String toolName = beforeToolExecution.request().name();
-                    ToolEnum tool = ToolEnum.getByToolName(toolName);
-                    String result = String.format("\n\n调用[%s]进行操作\n\n", tool.getText());
-                    sink.next(result);
-                  })
-              .onToolExecuted(
-                  (toolExecution) -> {
-                    String toolName = toolExecution.request().name();
-                    ToolEnum tool = ToolEnum.getByToolName(toolName);
-                    sink.next(ToolResHandler.handleToolRes(tool, toolExecution));
-                  })
-              .onCompleteResponse((completeResponse) -> sink.complete())
-              .onError(sink::error)
-              .start();
-        });
+        sink -> tokenStream
+            .onPartialResponse(sink::next)
+            .beforeToolExecution(
+                (beforeToolExecution) -> {
+                  String toolName = beforeToolExecution.request().name();
+                  ToolEnum tool = ToolEnum.getByToolName(toolName);
+                  String result = String.format("\n\n调用[%s]进行操作\n\n", tool.getText());
+                  sink.next(result);
+                })
+            .onToolExecuted(
+                (toolExecution) -> {
+                  String toolName = toolExecution.request().name();
+                  ToolEnum tool = ToolEnum.getByToolName(toolName);
+                  sink.next(ToolResHandler.handleToolRes(tool, toolExecution));
+                })
+            .onCompleteResponse((completeResponse) -> sink.complete())
+            .onError(sink::error)
+            .start());
   }
 }
