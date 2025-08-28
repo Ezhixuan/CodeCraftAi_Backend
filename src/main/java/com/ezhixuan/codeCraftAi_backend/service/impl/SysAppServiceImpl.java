@@ -4,16 +4,14 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.json.JSONUtil;
 import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
 import com.ezhixuan.codeCraftAi_backend.common.PageRequest;
-import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppGenerateReqVo;
-import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppInfoAdminResVo;
-import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppInfoCommonResVo;
-import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppQueryReqVo;
+import com.ezhixuan.codeCraftAi_backend.controller.app.vo.*;
 import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoAdminResVo;
 import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoCommonResVo;
 import com.ezhixuan.codeCraftAi_backend.core.CodeCraftFacade;
 import com.ezhixuan.codeCraftAi_backend.core.builder.BuildExecutor;
 import com.ezhixuan.codeCraftAi_backend.domain.dto.sys.chatHistory.SysChatHistorySubmitDto;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
+import com.ezhixuan.codeCraftAi_backend.domain.enums.LoadingStatusEnum;
 import com.ezhixuan.codeCraftAi_backend.domain.enums.MessageTypeEnum;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
@@ -246,5 +244,37 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
       log.error("重定向失败, redirectUrl:{}", redirectUrl);
       throw new BusinessException(ErrorCode.SYSTEM_ERROR, "跳转失败");
     }
+  }
+
+  @Override
+  public AppStatusResVo getStatus(Long appId) {
+    AppStatusResVo appStatusResVo = new AppStatusResVo();
+
+    SysApp sysApp = getById(appId);
+    if (isNull(sysApp)) {
+      throw new BusinessException(ErrorCode.PARAMS_ERROR, "应用不存在");
+    }
+    CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getEnumByValue(sysApp.getCodeGenType());
+    if (isNull(codeGenType)) {
+      log.error("应用id:{}存在代码生成类型错误,请检查 codeGenType:{}", appId, sysApp.getCodeGenType());
+      throw new BusinessException(ErrorCode.SYSTEM_ERROR, "代码生成类型错误");
+    }
+
+    appStatusResVo.setDeployStatus(
+        FileUtil.exist(PathUtil.buildPath(PathUtil.DEPLOY_DIR, codeGenType, appId))
+            ? LoadingStatusEnum.LOADED
+            : LoadingStatusEnum.ERROR);
+
+    appStatusResVo.setPreviewStatus(
+        FileUtil.exist(PathUtil.buildPath(PathUtil.PREVIEW_DIR, codeGenType, appId))
+            ? LoadingStatusEnum.LOADED
+            : LoadingStatusEnum.ERROR);
+
+    appStatusResVo.setOriginalDirStatus(
+        FileUtil.exist(PathUtil.buildPath(PathUtil.ORIGINAL_DIR, codeGenType, appId))
+            ? LoadingStatusEnum.LOADED
+            : LoadingStatusEnum.ERROR);
+
+    return appStatusResVo;
   }
 }

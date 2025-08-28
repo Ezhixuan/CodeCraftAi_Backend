@@ -3,10 +3,7 @@ package com.ezhixuan.codeCraftAi_backend.controller.app;
 import com.ezhixuan.codeCraftAi_backend.common.BaseResponse;
 import com.ezhixuan.codeCraftAi_backend.common.PageResponse;
 import com.ezhixuan.codeCraftAi_backend.common.R;
-import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppGenerateReqVo;
-import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppInfoCommonResVo;
-import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppQueryReqVo;
-import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppUpdateCommonReqVo;
+import com.ezhixuan.codeCraftAi_backend.controller.app.vo.*;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
@@ -69,6 +66,12 @@ public class AppController {
       @PathVariable("appId") Long appId, boolean reBuild, HttpServletResponse response) {
     String previewKey = appService.copyToPreview(appId, reBuild);
     appService.redirect(previewKey, response);
+  }
+
+  @Operation(summary = "获取应用状态")
+  @GetMapping("/status/{appId}")
+  public BaseResponse<AppStatusResVo> getStatus(@PathVariable("appId") Long id) {
+      return R.success(appService.getStatus(id));
   }
 
   @Operation(summary = "获取用户应用列表")

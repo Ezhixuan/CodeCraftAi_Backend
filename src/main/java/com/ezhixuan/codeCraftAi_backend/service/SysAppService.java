@@ -1,9 +1,6 @@
 package com.ezhixuan.codeCraftAi_backend.service;
 
-import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppGenerateReqVo;
-import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppInfoAdminResVo;
-import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppInfoCommonResVo;
-import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppQueryReqVo;
+import com.ezhixuan.codeCraftAi_backend.controller.app.vo.*;
 import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoAdminResVo;
 import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoCommonResVo;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
@@ -93,4 +90,12 @@ public interface SysAppService extends IService<SysApp> {
    * @param response HTTP响应对象
    */
   void redirect(String previewKey, HttpServletResponse response);
+
+  /**
+   * 获取应用状态 根据应用ID获取应用的状态信息
+   *
+   * @param appId 应用ID
+   * @return AppStatusResVo 应用状态信息
+   */
+  AppStatusResVo getStatus(Long appId);
 }
