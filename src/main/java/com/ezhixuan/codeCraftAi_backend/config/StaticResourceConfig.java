@@ -12,7 +12,7 @@ public class StaticResourceConfig implements WebMvcConfigurer {
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
     // 配置静态资源访问路径
     // URL路径: /static/**
-    // 实际路径: resources/static/preview目录下的文件
-    registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/preview/");
+    // 实际路径: resources/preview目录下的文件
+    registry.addResourceHandler("/static/**").addResourceLocations("classpath:/preview/");
   }
 }

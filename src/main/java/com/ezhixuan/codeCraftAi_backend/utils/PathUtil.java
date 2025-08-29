@@ -1,25 +1,26 @@
 package com.ezhixuan.codeCraftAi_backend.utils;
 
-import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.core.util.StrUtil;
 import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
+import org.springframework.util.ResourceUtils;
+
 import java.io.File;
+import java.io.IOException;
 
 /**
  * 路径工具类 用于构建和管理代码生成过程中的临时文件路径和部署路径
  *
  * @author ezhixuan
- * @version 0.0.1beta
+ * @version 0.0.2beta
+ * @since 0.0.1beta
  */
 public class PathUtil {
 
   /** 预览目录路径，用于存储代码生成的预览文件 */
-  public static final String PREVIEW_DIR =
-      ResourceUtil.getResource("static") + File.separator + "preview";
+  public static final String PREVIEW_DIR = resourcePath() + File.separator + "preview";
 
   /** 临时目录路径，用于存储临时文件 */
-  public static final String TEMP_DIR =
-      ResourceUtil.getResource("static") + File.separator + "temp";
+  public static final String TEMP_DIR = resourcePath() + File.separator + "temp";
 
   /** 原始目录路径，用于存储代码生成的原始文件 */
   public static final String ORIGINAL_DIR =
@@ -40,11 +41,24 @@ public class PathUtil {
   public static String buildPath(
       String basePath, CodeGenTypeEnum codeGenTypeEnum, Object uniqueId) {
     String dirName = StrUtil.format("{}_{}", codeGenTypeEnum.getValue(), uniqueId.toString());
-    String path = basePath + File.separator + dirName;
-    // 替换掉 file: 前缀
-    if (path.startsWith("file:")) {
-      path = path.replace("file:", "");
+    return basePath + File.separator + dirName;
+  }
+
+  /**
+   * 获取项目resources目录的绝对路径 通过Spring的ResourceUtils工具类获取classpath根路径并转换为绝对路径
+   *
+   * @since 0.0.2beta
+   * @return resources目录的绝对路径
+   */
+  public static String resourcePath() {
+    try {
+      return ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX).getAbsolutePath();
+    } catch (IOException exception) {
+      return System.getProperty("user.dir")
+          + File.separator
+          + "target"
+          + File.separator
+          + "classes";
     }
-    return path;
   }
 }
