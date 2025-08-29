@@ -14,6 +14,7 @@ import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoAdminResVo;
 import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoCommonResVo;
 import com.ezhixuan.codeCraftAi_backend.core.CodeCraftFacade;
 import com.ezhixuan.codeCraftAi_backend.core.builder.BuildExecutor;
+import com.ezhixuan.codeCraftAi_backend.domain.constant.PromptConstant;
 import com.ezhixuan.codeCraftAi_backend.domain.dto.sys.chatHistory.SysChatHistorySubmitDto;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
 import com.ezhixuan.codeCraftAi_backend.domain.enums.LoadingStatusEnum;
@@ -71,6 +72,11 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
             .messageTypeEnum(MessageTypeEnum.USER)
             .appId(appId)
             .build());
+    if (sysApp.isFirstChat()) {
+      message = message + PromptConstant.GENERATE_APP_NAME;
+      sysApp.setFirstChat(false);
+      updateById(sysApp);
+    }
     StringBuilder contentBuilder = new StringBuilder();
     CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getByValue(sysApp.getCodeGenType());
     return codeCraftFacade

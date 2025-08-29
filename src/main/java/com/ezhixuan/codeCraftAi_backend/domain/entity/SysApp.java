@@ -1,19 +1,18 @@
 package com.ezhixuan.codeCraftAi_backend.domain.entity;
 
-import java.io.Serial;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 import com.mybatisflex.annotation.Column;
 import com.mybatisflex.annotation.Id;
 import com.mybatisflex.annotation.KeyType;
 import com.mybatisflex.annotation.Table;
 import com.mybatisflex.core.keygen.KeyGenerators;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  *  实体类。
@@ -75,6 +74,11 @@ public class SysApp implements Serializable {
      * 所属用户 id
      */
     private Long userId;
+
+    /**
+     * 是否首次对话
+     */
+    private boolean firstChat;
 
     /**
      * 创建时间

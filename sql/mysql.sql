@@ -48,6 +48,7 @@ CREATE TABLE `sys_app`
     `create_time`   datetime                                NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`   datetime                                NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted`       tinyint                                 NOT NULL DEFAULT '0' COMMENT '是否删除：0-未删除，1-已删除',
+    `first_chat`    tinyint                                 NOT NULL DEFAULT '1' COMMENT '首次对话',
     PRIMARY KEY (`id`, `name`, `user_id`),
     UNIQUE KEY `uq-deploy` (`deploy_key`) USING BTREE COMMENT '部署标识唯一',
     KEY `idx-name` (`name`) USING BTREE COMMENT '应用名称索引',

@@ -1,7 +1,8 @@
 package com.ezhixuan.codeCraftAi_backend.ai;
 
 import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
-import com.ezhixuan.codeCraftAi_backend.ai.tools.FileSaveTool;
+import com.ezhixuan.codeCraftAi_backend.ai.tools.FileTool;
+import com.ezhixuan.codeCraftAi_backend.ai.tools.UserMessageTool;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysChatHistory;
 import com.ezhixuan.codeCraftAi_backend.domain.enums.MessageTypeEnum;
 import com.ezhixuan.codeCraftAi_backend.service.SysChatHistoryService;
@@ -44,6 +45,9 @@ public class CodeCraftAiModelFactory {
   private final RedisChatMemoryStore redisChatMemoryStore;
   private final SysChatHistoryService chatHistoryService;
 
+  private final FileTool fileTool;
+  private final UserMessageTool userMessageTool;
+
   /** AI服务缓存 使用Caffeine缓存AI服务实例，提高性能并减少重复创建的开销 缓存最大容量为100，访问后10分钟过期，写入后30分钟过期 */
   private final LoadingCache<@NonNull Long, CodeCraftAiChatService> AI_SERVICE_CACHE =
       Caffeine.newBuilder()
@@ -81,7 +85,7 @@ public class CodeCraftAiModelFactory {
               key ->
                   preGenerateAiService(chatModel, powerfulStreamingChatModel)
                       .chatMemoryProvider(chatMemoryId -> generateChatHistory(memoryId))
-                      .tools(new FileSaveTool())
+                      .tools(fileTool, userMessageTool)
                       .hallucinatedToolNameStrategy(
                           toolExecutionRequest ->
                               ToolExecutionResultMessage.from(

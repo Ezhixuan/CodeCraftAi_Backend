@@ -7,7 +7,8 @@ import lombok.extern.slf4j.Slf4j;
  * 工具执行结果处理器 负责处理不同类型工具的执行结果，根据工具类型调用相应的结果处理方法
  *
  * @author ezhixuan
- * @version 0.0.1beta
+ * @since 0.0.1beta
+ * @version 0.0.2beta
  */
 @Slf4j
 public class ToolResHandler {
@@ -21,7 +22,9 @@ public class ToolResHandler {
    */
   public static String handleToolRes(ToolEnum toolEnum, ToolExecution toolExecution) {
     return switch (toolEnum) {
-      case WRITE_TOOL -> FileSaveTool.writeToolRes(toolExecution);
+      case WRITE_TOOL -> FileTool.writeToolRes(toolExecution);
+      case READ_TOOL -> FileTool.readToolRes(toolExecution);
+      case APP_NAME_TOOL -> "";
       case UNKNOWN_TOOL -> {
         log.error("未知工具");
         yield String.format("\n\n[%s] %s\n\n", toolEnum.getText(), toolExecution.result());

@@ -13,6 +13,10 @@ import lombok.Getter;
 public enum ToolEnum {
   /** 文件写入工具 */
   WRITE_TOOL("文件写入工具", "writeTool"),
+  /** 文件读取工具 */
+  READ_TOOL("文件读取工具", "readTool"),
+  /** 应用名生成工具 */
+  APP_NAME_TOOL("应用名生成工具", "generateAppNameTool"),
   /** 未知工具 */
   UNKNOWN_TOOL("未知工具", "unknownTool");
 
