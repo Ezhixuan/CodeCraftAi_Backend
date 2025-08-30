@@ -4,12 +4,7 @@ import cn.hutool.core.img.ImgUtil;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
 import io.github.bonigarcia.wdm.WebDriverManager;
-import java.io.File;
-import java.time.Duration;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.OutputType;
@@ -18,6 +13,13 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.io.File;
+import java.time.Duration;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 /**
  * 截图工具类 提供网页截图功能，使用WebDriver池化管理提高性能
@@ -30,6 +32,8 @@ public class ScreenshotUtil {
 
   /** 最大WebDriver实例数 */
   private static final int MAX_WEB_DRIVER = 10;
+  private static final int WIDTH = 1920;
+  private static final int HEIGHT = 1080;
 
   /** WebDriver实例阻塞队列，用于池化管理 */
   private static final BlockingQueue<WebDriver> WEB_DRIVERS =
@@ -38,8 +42,7 @@ public class ScreenshotUtil {
   static {
     try {
       WebDriverManager.chromedriver().setup();
-      final int WIDTH = 1920;
-      final int HEIGHT = 1080;
+
       for (int i = 0; i < MAX_WEB_DRIVER; i++) {
         WEB_DRIVERS.offer(createWebDriver(WIDTH, HEIGHT));
       }
@@ -71,6 +74,10 @@ public class ScreenshotUtil {
     WebDriver webDriver = null;
     try {
       webDriver = WEB_DRIVERS.take();
+      if (!isHealthyDriver(webDriver)) {
+        webDriver.quit();
+        webDriver = createWebDriver(WIDTH, HEIGHT);
+      }
       webDriver.get(webUrl);
       waitPageLoad(webDriver);
       File screenshot = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.FILE);
@@ -174,5 +181,29 @@ public class ScreenshotUtil {
       log.error("初始化 Chrome 浏览器失败", e);
       throw new BusinessException(ErrorCode.SYSTEM_ERROR, "初始化 Chrome 浏览器失败");
     }
+  }
+
+  /**
+   * 检查WebDriver实例是否健康可用
+   *
+   * @param driver 待检查的WebDriver实例
+   * @return true表示健康可用，false表示不可用
+   */
+  private static boolean isHealthyDriver(WebDriver driver) {
+    try {
+      driver.getCurrentUrl();
+      return true;
+    } catch (Exception exception) {
+      return false;
+    }
+  }
+
+  /**
+   * 销毁方法，用于在应用关闭时退出所有WebDriver实例<br>
+   * 通过PreDestroy注解标记，确保在Spring容器关闭时自动调用此方法
+   */
+  @PreDestroy
+  public void destroy() {
+    WEB_DRIVERS.forEach(WebDriver::quit);
   }
 }
