@@ -3,6 +3,7 @@ package com.ezhixuan.codeCraftAi_backend.service.impl;
 import static com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum.VUE_PROJECT;
 import static java.util.Objects.isNull;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static org.springframework.util.StringUtils.hasText;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IORuntimeException;
@@ -22,9 +23,11 @@ import com.ezhixuan.codeCraftAi_backend.domain.enums.MessageTypeEnum;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
 import com.ezhixuan.codeCraftAi_backend.mapper.SysAppMapper;
+import com.ezhixuan.codeCraftAi_backend.service.PictureService;
 import com.ezhixuan.codeCraftAi_backend.service.SysAppService;
 import com.ezhixuan.codeCraftAi_backend.service.SysChatHistoryService;
 import com.ezhixuan.codeCraftAi_backend.utils.PathUtil;
+import com.ezhixuan.codeCraftAi_backend.utils.ScreenshotUtil;
 import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import com.mybatisflex.core.paginate.Page;
 import com.mybatisflex.core.query.QueryWrapper;
@@ -34,6 +37,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -53,6 +58,7 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
 
   @Resource private CodeCraftFacade codeCraftFacade;
   @Resource private SysChatHistoryService chatHistoryService;
+  @Resource private PictureService pictureService;
 
   @Override
   public Flux<ServerSentEvent<String>> generateCode(String message, Long appId) {
@@ -218,14 +224,14 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     } else if (FileUtil.exist(deployPath)) {
       // 一般部署都是完整内容文件,但是为了系统完整还是需要进判断
       if (FileUtil.exist(deployPath, "index.html")) {
-        return copyFromSourcePath(deployPath, targetPath, codeGenType);
+        return copyFromSourcePath(deployPath, targetPath, appId, codeGenType);
       }
       copyAndBuildFromOriginal(appId, sourcePath, codeGenType);
     } else if (!FileUtil.exist(sourcePath)) {
       copyAndBuildFromOriginal(appId, sourcePath, codeGenType);
     }
 
-    return copyFromSourcePath(sourcePath, targetPath, codeGenType);
+    return copyFromSourcePath(sourcePath, targetPath, appId, codeGenType);
   }
 
   /**
@@ -269,7 +275,7 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
    * @return String 目标路径的最后一级目录名
    */
   private String copyFromSourcePath(
-      String sourcePath, String targetPath, CodeGenTypeEnum codeGenType) {
+      String sourcePath, String targetPath, long appId, CodeGenTypeEnum codeGenType) {
     File sourceDir = FileUtil.file(sourcePath);
     if (Objects.equals(codeGenType, VUE_PROJECT)) {
       sourceDir = FileUtil.file(sourceDir, "/dist");
@@ -278,12 +284,14 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     File targetDir = FileUtil.file(targetPath);
     FileUtil.clean(targetDir);
     FileUtil.copyContent(sourceDir, targetDir, true);
-    return targetPath.substring(targetPath.lastIndexOf("/") + 1);
+    String previewKey = targetPath.substring(targetPath.lastIndexOf("/") + 1);
+    updateAppCover(appId, previewKey);
+    return previewKey;
   }
 
   @Override
   public void redirect(String previewKey, HttpServletResponse response) {
-    String redirectUrl = "/api/static/" + previewKey + "/index.html";
+    String redirectUrl = getUrl(previewKey, false);
     try {
       response.sendRedirect(redirectUrl);
     } catch (IOException e) {
@@ -331,5 +339,70 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     FileUtil.clean(deployPath);
     copyAndBuildFromOriginal(appId, deployPath, codeGenType);
     return deployPath.substring(deployPath.lastIndexOf("/") + 1);
+  }
+
+  /**
+   * 异步更新应用封面
+   *
+   * @param appId 应用ID
+   * @param previewKey 预览键值
+   */
+  private void updateAppCover(long appId, String previewKey) {
+    Thread.startVirtualThread(
+        () -> {
+          try {
+            SysApp sysApp = getById(appId);
+            String cover = sysApp.getCover();
+            if (isNull(sysApp)) {
+              throw new BusinessException(ErrorCode.PARAMS_ERROR, "应用不存在");
+            }
+            String webUrl = getUrl(previewKey, true);
+            String newCover = screenshot(appId, webUrl);
+            if (hasText(newCover)) {
+              if (!hasText(cover)) {
+                // 应用本身就有封面
+                pictureService.delete(cover);
+              }
+              sysApp.setCover(newCover);
+              updateById(sysApp);
+            }
+          } catch (Exception e) {
+            log.error("更新应用封面失败, appId:{}", appId);
+          }
+        });
+  }
+
+  /**
+   * 对指定URL进行截图并上传
+   *
+   * @param appId 应用ID
+   * @param webUrl 需要截图的网页URL
+   * @return 上传后的图片访问路径，失败时返回空字符串
+   */
+  private String screenshot(long appId, String webUrl) {
+    try {
+      File screenshot = ScreenshotUtil.screenshot(webUrl, true);
+      String uploadPath =
+          LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"))
+              + File.separator
+              + screenshot.getName();
+      return pictureService.upload(screenshot, uploadPath);
+    } catch (Exception exception) {
+      log.error("应用id:{}截图失败,请检查 webUrl:{}", appId, webUrl);
+      return "";
+    }
+  }
+
+  /**
+   * 获取预览URL
+   *
+   * @param previewKey 预览键值
+   * @param hasLocal 是否包含本地地址
+   * @return 根据参数生成的URL
+   */
+  private String getUrl(String previewKey, boolean hasLocal) {
+    return hasLocal
+        ? "http://localhost:8911/api/static/" + previewKey + "/index.html"
+        : "/api/static/" + previewKey + "/index.html";
   }
 }
