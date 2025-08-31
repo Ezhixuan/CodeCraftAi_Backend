@@ -2,6 +2,7 @@ package com.ezhixuan.codeCraftAi_backend.service.impl;
 
 import static com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum.VUE_PROJECT;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static org.springframework.util.StringUtils.hasText;
 
@@ -381,8 +382,9 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
    * @return 上传后的图片访问路径，失败时返回空字符串
    */
   private String screenshot(long appId, String webUrl) {
+    File screenshot = null;
     try {
-      File screenshot = ScreenshotUtil.screenshot(webUrl, true);
+      screenshot = ScreenshotUtil.screenshot(webUrl, true);
       String uploadPath =
           LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd"))
               + File.separator
@@ -391,6 +393,10 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     } catch (Exception exception) {
       log.error("应用id:{}截图失败,请检查 webUrl:{}", appId, webUrl);
       return "";
+    } finally {
+        if (nonNull(screenshot)) {
+          screenshot.delete();
+        }
     }
   }
 
