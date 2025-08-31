@@ -271,6 +271,7 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
    *
    * @param sourcePath 源路径
    * @param targetPath 目标路径
+   * @param appId 用于生成截图时的数据查询
    * @param codeGenType 代码生成类型枚举
    * @return String 目标路径的最后一级目录名
    */
