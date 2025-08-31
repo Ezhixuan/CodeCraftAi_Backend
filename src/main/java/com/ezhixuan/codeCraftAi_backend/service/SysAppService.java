@@ -17,7 +17,7 @@ import java.util.Map;
  *
  * @author Ezhixuan
  * @since 0.0.1beta
- * @version 0.0.2beta
+ * @version 0.0.3beta
  */
 public interface SysAppService extends IService<SysApp> {
 
@@ -111,4 +111,13 @@ public interface SysAppService extends IService<SysApp> {
    * @return String 访问路径
    */
   String doDeploy(Long appId);
+
+  /**
+   * 执行应用代码打包 将应用代码打包成ZIP文件并提供下载
+   *
+   * @param appId 应用ID
+   * @param response HTTP响应对象，用于返回ZIP文件下载流
+   * @since 0.0.3beta
+   */
+  void doZip(Long appId, HttpServletResponse response);
 }

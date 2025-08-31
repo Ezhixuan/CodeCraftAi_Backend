@@ -74,6 +74,12 @@ public class AppController {
     return R.success(appService.doDeploy(appId));
   }
 
+  @Operation(summary = "应用下载")
+  @GetMapping("/download/{appId}")
+  public void doDownload(@PathVariable("appId") Long appId, HttpServletResponse response) {
+    appService.doZip(appId, response);
+  }
+
   @Operation(summary = "获取应用状态")
   @GetMapping("/status/{appId}")
   public BaseResponse<AppStatusResVo> getStatus(@PathVariable("appId") Long id) {

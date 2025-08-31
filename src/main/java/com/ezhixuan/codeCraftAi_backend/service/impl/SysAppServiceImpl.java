@@ -8,6 +8,7 @@ import static org.springframework.util.StringUtils.hasText;
 
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IORuntimeException;
+import cn.hutool.core.util.ZipUtil;
 import cn.hutool.json.JSONUtil;
 import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
 import com.ezhixuan.codeCraftAi_backend.common.PageRequest;
@@ -37,7 +38,10 @@ import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
@@ -341,6 +345,27 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     FileUtil.clean(deployPath);
     copyAndBuildFromOriginal(appId, deployPath, codeGenType);
     return deployPath.substring(deployPath.lastIndexOf("/") + 1);
+  }
+
+  @Override
+  public void doZip(Long appId, HttpServletResponse response) {
+    SysApp sysApp = getById(appId);
+    if (isNull(sysApp)) {
+      throw new BusinessException(ErrorCode.PARAMS_ERROR, "应用不存在");
+    }
+    CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getByValue(sysApp.getCodeGenType());
+    String zipPath = PathUtil.buildPath(PathUtil.ORIGINAL_DIR, codeGenType, appId);
+    try (OutputStream outputStream = response.getOutputStream()) {
+      // 设置返回头
+      response.setContentType("application/zip");
+      // 对文件名进行URL编码，解决包含中文字符时HTTP头无效的问题
+      String encodedFileName = URLEncoder.encode(sysApp.getName() + ".zip", StandardCharsets.UTF_8);
+      response.setHeader(
+          "Content-Disposition", String.format("attachment; filename*=UTF-8''%s", encodedFileName));
+      ZipUtil.zip(outputStream, StandardCharsets.UTF_8, false, null, FileUtil.file(zipPath));
+    } catch (IOException e) {
+      log.error("应用id:{}下载失败", appId, e);
+    }
   }
 
   /**
