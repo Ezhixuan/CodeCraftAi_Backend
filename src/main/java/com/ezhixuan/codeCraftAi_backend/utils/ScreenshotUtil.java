@@ -1,6 +1,7 @@
 package com.ezhixuan.codeCraftAi_backend.utils;
 
 import cn.hutool.core.img.ImgUtil;
+import cn.hutool.core.io.FileUtil;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
 import io.github.bonigarcia.wdm.WebDriverManager;
@@ -13,8 +14,10 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.springframework.util.ResourceUtils;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
@@ -35,6 +38,12 @@ public class ScreenshotUtil {
   private static final int WIDTH = 1920;
   private static final int HEIGHT = 1080;
 
+  /** 截图临时目录名称 */
+  private static final String SCREENSHOT_DIR_NAME = "screenshots";
+
+  /** 截图临时目录 */
+  private static final File SCREENSHOT_DIR = initScreenshotDir();
+
   /** WebDriver实例阻塞队列，用于池化管理 */
   private static final BlockingQueue<WebDriver> WEB_DRIVERS =
       new ArrayBlockingQueue<>(MAX_WEB_DRIVER);
@@ -48,6 +57,23 @@ public class ScreenshotUtil {
       }
     } catch (Exception exception) {
       log.error("webDriver初始化失败", exception);
+    }
+  }
+
+  /**
+   * 初始化截图目录
+   *
+   * @return 截图目录文件对象
+   */
+  private static File initScreenshotDir() {
+    try {
+      return FileUtil.file(
+          ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX).getAbsolutePath(),
+          SCREENSHOT_DIR_NAME);
+    } catch (FileNotFoundException e) {
+      return FileUtil.file(
+          System.getProperty("user.dir") + File.separator + "target" + File.separator + "classes",
+          SCREENSHOT_DIR_NAME);
     }
   }
 
@@ -83,7 +109,12 @@ public class ScreenshotUtil {
       File screenshot = ((TakesScreenshot) webDriver).getScreenshotAs(OutputType.FILE);
       String name = screenshot.getName();
       System.out.println(name);
-      return compressed ? compress(screenshot) : screenshot;
+
+      // 将截图文件移动到统一的截图目录
+      File targetFile = new File(SCREENSHOT_DIR, name);
+      FileUtil.move(screenshot, targetFile, true);
+
+      return compressed ? compress(targetFile) : targetFile;
     } catch (Exception exception) {
       log.error("获取webDriver失败", exception);
       throw new BusinessException(ErrorCode.SYSTEM_ERROR, "获取webDriver失败");
@@ -102,12 +133,15 @@ public class ScreenshotUtil {
   private static File compress(File screenshot) {
     final float COMPRESS_QUALITY = 0.3f;
     try {
-      File compressedFile = File.createTempFile(System.currentTimeMillis() + "_compressed", ".jpg");
+      File compressedFile =
+          File.createTempFile(System.currentTimeMillis() + "_compressed", ".jpg", SCREENSHOT_DIR);
       ImgUtil.compress(screenshot, compressedFile, COMPRESS_QUALITY);
       return compressedFile;
     } catch (Exception exception) {
       log.error("压缩图片失败", exception);
       throw new BusinessException(ErrorCode.SYSTEM_ERROR, "压缩图片失败");
+    } finally {
+      FileUtil.del(screenshot);
     }
   }
 
