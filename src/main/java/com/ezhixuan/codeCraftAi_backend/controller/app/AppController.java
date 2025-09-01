@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/app")
 @Validated
-@Tag(name = "应用控制器")
+@Tag(name = "AppController", description = "应用控制器")
 @RequiredArgsConstructor
 public class AppController {
 

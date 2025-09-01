@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/app/admin")
 @Validated
-@Tag(name = "应用控制器(管理员)")
+@Tag(name = "AdminAppController", description = "应用控制器(管理员)")
 @RequiredArgsConstructor
 public class AdminAppController {
 

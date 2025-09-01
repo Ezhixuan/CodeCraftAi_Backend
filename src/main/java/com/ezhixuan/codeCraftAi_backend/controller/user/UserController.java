@@ -19,7 +19,7 @@ import java.util.List;
 @RequestMapping("/user")
 @RestController
 @Validated
-@Tag(name = "用户控制器")
+@Tag(name = "UserController", description = "用户控制器")
 @RequiredArgsConstructor
 public class UserController {
 

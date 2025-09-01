@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/chat/history")
 @Validated
-@Tag(name = "对话历史")
+@Tag(name = "ChatHistoryController", description = "对话历史控制器")
 @RequiredArgsConstructor
 public class ChatHistoryController {
 
