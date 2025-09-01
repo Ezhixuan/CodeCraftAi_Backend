@@ -19,29 +19,29 @@ public enum UserRoleEnum {
   ;
 
   @Schema(description = "用户角色")
-  private final String role;
+  private final String value;
 
   @Schema(description = "用户角色描述")
   private final String desc;
 
-  UserRoleEnum(String role, String desc) {
-    this.role = role;
+  UserRoleEnum(String value, String desc) {
+    this.value = value;
     this.desc = desc;
   }
 
   /**
-   * 根据角色标识获取用户角色枚举
+   * 根据角色标识获取用户角色枚举 <br>
    * 遍历所有枚举值，找到与给定角色标识匹配的枚举项
    *
-   * @param role 用户角色标识
-   * @return 匹配的用户角色枚举，如果未找到则返回null
+   * @param value 用户角色标识
+   * @return 匹配的用户角色枚举，如果未找到则返回user
    */
-  public static UserRoleEnum getByRole(String role) {
-    for (UserRoleEnum value : UserRoleEnum.values()) {
-      if (value.getRole().equals(role)) {
-        return value;
+  public static UserRoleEnum getByValue(String value) {
+    for (UserRoleEnum role : UserRoleEnum.values()) {
+      if (role.getValue().equals(value)) {
+        return role;
       }
     }
-    return null;
+    return USER;
   }
 }

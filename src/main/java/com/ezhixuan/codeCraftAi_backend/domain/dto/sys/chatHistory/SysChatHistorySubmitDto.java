@@ -32,7 +32,7 @@ public class SysChatHistorySubmitDto {
   public SysChatHistory toEntity() {
     SysChatHistory entity = new SysChatHistory();
     entity.setMessage(message);
-    entity.setMessageType(messageTypeEnum.getType());
+    entity.setMessageType(messageTypeEnum.getValue());
     entity.setAppId(appId);
     entity.setUserId(userId);
     return entity;

@@ -23,7 +23,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.ezhixuan.codeCraftAi_backend.domain.enums.UserRoleEnum.ADMIN;
-import static com.ezhixuan.codeCraftAi_backend.domain.enums.UserRoleEnum.getByRole;
+import static com.ezhixuan.codeCraftAi_backend.domain.enums.UserRoleEnum.getByValue;
 import static com.ezhixuan.codeCraftAi_backend.utils.UserUtil.*;
 import static java.util.Objects.isNull;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -59,8 +59,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
     sysUser.setPassword(encryptedPassword);
     sysUser.setAccount(account);
     sysUser.setName("用户" + System.currentTimeMillis());
-    sysUser.setStatus(UserStatusEnum.NORMAL.getCode());
-    sysUser.setRole(count() == 0 ? ADMIN.getRole() : UserRoleEnum.USER.getRole());
+    sysUser.setStatus(UserStatusEnum.NORMAL.getValue());
+    sysUser.setRole(count() == 0 ? ADMIN.getValue() : UserRoleEnum.USER.getValue());
     save(sysUser);
     return sysUser.getId();
   }
@@ -80,7 +80,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
     if (isNull(user)) {
       throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在或密码错误");
     }
-    if (Objects.equals(user.getStatus(), UserStatusEnum.DISABLED.getCode())) {
+    if (Objects.equals(user.getStatus(), UserStatusEnum.DISABLED.getValue())) {
       throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "用户已被禁用");
     }
     // 记录用户登录态
@@ -155,7 +155,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser>
     if (isNull(disableUser)) {
       throw new BusinessException(ErrorCode.PARAMS_ERROR, "用户不存在");
     }
-    if (Objects.equals(getByRole(disableUser.getRole()), ADMIN)) {
+    if (Objects.equals(getByValue(disableUser.getRole()), ADMIN)) {
       throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限操作管理员");
     }
     disableUser.setStatus(0);

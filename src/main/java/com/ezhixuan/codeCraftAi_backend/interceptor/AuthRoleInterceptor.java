@@ -56,7 +56,7 @@ public class AuthRoleInterceptor {
     }
     // 判断权限是否一致
     UserRoleEnum needRoleEnum = authRole.role();
-    UserRoleEnum userRoleEnum = UserRoleEnum.getByRole(userVo.getRole());
+    UserRoleEnum userRoleEnum = UserRoleEnum.getByValue(userVo.getRole());
     if (!Objects.equals(needRoleEnum, userRoleEnum)) {
       throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
     }

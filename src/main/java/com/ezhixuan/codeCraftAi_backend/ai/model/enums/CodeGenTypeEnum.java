@@ -15,13 +15,13 @@ public enum CodeGenTypeEnum {
     VUE_PROJECT("Vue 模式", "vue_project");
 
     @Schema(description = "枚举文本")
-    private final String text;
+    private final String desc;
 
     @Schema(description = "代码生成模式")
     private final String value;
 
-    CodeGenTypeEnum(String text, String value) {
-        this.text = text;
+    CodeGenTypeEnum(String desc, String value) {
+        this.desc = desc;
         this.value = value;
     }
 

@@ -33,7 +33,7 @@ public class UserAddReqVo implements Serializable {
     SysUser user = new SysUser();
     user.setAccount(account);
     user.setName(name);
-    user.setRole(UserRoleEnum.USER.getRole());
+    user.setRole(UserRoleEnum.USER.getValue());
     user.setStatus(1);
     user.setPassword(UserUtil.getEncryptedPassword(defaultPassword));
     return user;

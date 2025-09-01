@@ -19,26 +19,27 @@ public enum LoadingStatusEnum {
   ERROR(2, "加载失败");
 
   /** 状态码 */
-  private final int code;
-  /** 状态描述信息 */
-  private final String message;
+  private final int value;
 
-  LoadingStatusEnum(int code, String message) {
-    this.code = code;
-    this.message = message;
+  /** 状态描述信息 */
+  private final String desc;
+
+  LoadingStatusEnum(int value, String desc) {
+    this.value = value;
+    this.desc = desc;
   }
 
   /**
-   * 根据状态码获取枚举值
+   * 根据状态码获取枚举值 <br>
    * 遍历枚举值，找到与给定状态码匹配的枚举项
    *
-   * @param code 状态码
+   * @param value 状态码
    * @return 匹配的状态描述信息枚举，如果未找到则返回error
    */
-  public static LoadingStatusEnum getByCode(int code) {
-    for (LoadingStatusEnum value : LoadingStatusEnum.values()) {
-      if (value.code == code) {
-        return value;
+  public static LoadingStatusEnum getByValue(int value) {
+    for (LoadingStatusEnum status : LoadingStatusEnum.values()) {
+      if (status.value == value) {
+        return status;
       }
     }
     return ERROR;

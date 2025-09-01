@@ -18,29 +18,28 @@ public enum UserStatusEnum {
   DISABLED(0, "禁用");
 
   @Schema(description = "状态码")
-  private final Integer code;
+  private final Integer value;
 
   @Schema(description = "状态描述")
-  private final String message;
+  private final String desc;
 
-  UserStatusEnum(Integer code, String message) {
-    this.code = code;
-    this.message = message;
+  UserStatusEnum(Integer value, String desc) {
+    this.value = value;
+    this.desc = desc;
   }
 
   /**
-   * 根据状态码获取状态描述
-   * 遍历所有枚举值，找到与给定状态码匹配的枚举项并返回其描述信息
+   * 根据状态码获取状态描述 遍历所有枚举值，找到与给定状态码匹配的枚举项并返回其描述信息
    *
    * @param code 状态码
    * @return 匹配的状态描述，如果未找到则返回null
    */
-  public static String getMessage(Integer code) {
+  public static String getDesc(Integer code) {
     for (UserStatusEnum value : UserStatusEnum.values()) {
-      if (value.getCode().equals(code)) {
-        return value.getMessage();
+      if (value.getValue().equals(code)) {
+        return value.getDesc();
       }
     }
-    return null;
+    return DISABLED.getDesc();
   }
 }

@@ -18,28 +18,29 @@ public enum MessageTypeEnum {
   ;
 
   /** 消息类型标识 */
-  private final String type;
+  private final String value;
+
   /** 消息类型描述 */
   private final String desc;
 
-  MessageTypeEnum(String type, String desc) {
-    this.type = type;
+  MessageTypeEnum(String value, String desc) {
+    this.value = value;
     this.desc = desc;
   }
 
   /**
-   * 根据类型获取消息类型枚举
+   * 根据类型获取消息类型枚举<br>
    * 遍历所有枚举值，找到与给定类型匹配的枚举项
    *
-   * @param type 消息类型标识
-   * @return 匹配的消息类型枚举，如果未找到则返回null
+   * @param value 消息类型标识
+   * @return 匹配的消息类型枚举，如果未找到则返回userMessage
    */
-  public static MessageTypeEnum getByType(String type) {
-    for (MessageTypeEnum value : values()) {
-      if (value.getType().equals(type)) {
-        return value;
+  public static MessageTypeEnum getByValue(String value) {
+    for (MessageTypeEnum type : values()) {
+      if (type.getValue().equals(value)) {
+        return type;
       }
     }
-    return null;
+    return USER;
   }
 }

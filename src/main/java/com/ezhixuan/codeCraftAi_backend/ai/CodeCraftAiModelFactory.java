@@ -158,7 +158,7 @@ public class CodeCraftAiModelFactory {
     chatMemory.clear();
     messages.forEach(
         message -> {
-          switch (MessageTypeEnum.getByType(message.getMessageType())) {
+          switch (MessageTypeEnum.getByValue(message.getMessageType())) {
             case MessageTypeEnum.AI -> chatMemory.add(AiMessage.from(message.getMessage()));
             case MessageTypeEnum.USER -> chatMemory.add(UserMessage.from(message.getMessage()));
             case null -> log.error("未知消息类型: {}", message.getMessageType());
