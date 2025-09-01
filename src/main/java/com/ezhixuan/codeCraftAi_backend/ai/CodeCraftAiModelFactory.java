@@ -39,7 +39,8 @@ public class CodeCraftAiModelFactory {
   /** 最大消息数量，用于限制聊天历史记录的长度 */
   private static final int MAX_MESSAGES = 25;
 
-  private final ChatModel chatModel;
+  private final ChatModel openAiChatModel;
+  private final ChatModel routerChatModel;
   private final StreamingChatModel openAiStreamingChatModel;
   private final StreamingChatModel powerfulStreamingChatModel;
   private final RedisChatMemoryStore redisChatMemoryStore;
@@ -83,7 +84,7 @@ public class CodeCraftAiModelFactory {
           AI_SERVICE_CACHE.get(
               memoryId,
               key ->
-                  preGenerateAiService(chatModel, powerfulStreamingChatModel)
+                  preGenerateAiService(openAiChatModel, powerfulStreamingChatModel)
                       .chatMemoryProvider(chatMemoryId -> generateChatHistory(memoryId))
                       .tools(fileTool, userMessageTool)
                       .hallucinatedToolNameStrategy(
@@ -95,6 +96,10 @@ public class CodeCraftAiModelFactory {
     };
   }
 
+  public CodeCraftAiChatService getRouterAiService() {
+    return AiServices.builder(CodeCraftAiChatService.class).chatModel(routerChatModel).build();
+  }
+
   /**
    * 生成AI服务实例 根据内存ID创建新的AI服务实例
    *
@@ -103,7 +108,7 @@ public class CodeCraftAiModelFactory {
    */
   private CodeCraftAiChatService generateAiService(long memoryId) {
     return AiServices.builder(CodeCraftAiChatService.class)
-        .chatModel(chatModel)
+        .chatModel(openAiChatModel)
         .streamingChatModel(openAiStreamingChatModel)
         .chatMemory(generateChatHistory(memoryId))
         .build();

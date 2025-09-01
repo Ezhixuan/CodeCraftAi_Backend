@@ -25,12 +25,11 @@ import java.io.File;
 import java.util.Objects;
 
 /**
- * 代码工匠门面类
- * 提供AI代码生成和保存的核心业务功能，封装了聊天、解析和保存的完整流程
- * 支持同步和异步流式处理两种模式
+ * 代码工匠门面类 提供AI代码生成和保存的核心业务功能，封装了聊天、解析和保存的完整流程 支持同步和异步流式处理两种模式
  *
  * @author ezhixuan
- * @version 0.0.1beta
+ * @version 0.0.3beta
+ * @since 0.0.1beta
  */
 @Service
 @Slf4j
@@ -99,10 +98,29 @@ public class CodeCraftFacade {
         yield chatAndSaveStream(stringFlux, codeGenType, appId);
       }
       case VUE_PROJECT -> {
-        TokenStream stringFlux = chatService.vueProjectStream(appId, userMessage);
+        TokenStream stringFlux = chatService.chatVueProjectStream(appId, userMessage);
         yield convertToFlux(stringFlux);
       }
     };
+  }
+
+  /**
+   * 路由聊天服务，根据用户消息判断代码生成类型<br>
+   * 通过AI模型分析用户需求，自动识别应该使用的代码生成模式<br>
+   * 当AI模型分析失败时，使用指定的默认代码生成类型
+   *
+   * @since 0.0.3beta
+   * @param userMessage 用户输入的消息内容，不能为空
+   * @param defaultType 当AI模型分析失败时使用的默认代码生成类型
+   * @return CodeGenTypeEnum 代码生成类型枚举，用于确定后续处理流程
+   */
+  public CodeGenTypeEnum chatRouter(@NotBlank String userMessage, CodeGenTypeEnum defaultType) {
+    try {
+      CodeCraftAiChatService chatService = aiModelFactory.getRouterAiService();
+      return chatService.chatRouter(userMessage);
+    } catch (Exception exception) {
+      return defaultType;
+    }
   }
 
   /**

@@ -1,7 +1,6 @@
 package com.ezhixuan.codeCraftAi_backend.controller.app.vo;
 
 import cn.hutool.core.util.IdUtil;
-import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
 import com.ezhixuan.codeCraftAi_backend.domain.constant.AppConstant;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
 import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
@@ -21,18 +20,12 @@ public class AppGenerateReqVo implements Serializable {
   @Schema(description = "初始化提示")
   private String initPrompt;
 
-  @NotBlank(message = "代码生成类型不能为空")
-  @Schema(description = "代码生成类型")
-  private String codeGenType;
-
   public SysApp toEntity() {
-    CodeGenTypeEnum enumByValue = CodeGenTypeEnum.getByValue(codeGenType);
     SysApp entity = new SysApp();
     entity.setName(initPrompt.substring(0, Math.min(initPrompt.length(), 12)));
     entity.setInitPrompt(initPrompt);
     entity.setPriority(AppConstant.BASE_PRIORITY);
     entity.setUserId(UserUtil.getLoginUserId());
-    entity.setCodeGenType(enumByValue.getValue());
     entity.setDeployKey(IdUtil.getSnowflakeNextIdStr() + "-" + 0);
     return entity;
   }

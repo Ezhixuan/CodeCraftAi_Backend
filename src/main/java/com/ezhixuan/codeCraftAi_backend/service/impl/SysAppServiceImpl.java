@@ -127,6 +127,9 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
   @Override
   public Long doGenerate(AppGenerateReqVo reqVo) {
     SysApp entity = reqVo.toEntity();
+    CodeGenTypeEnum codeGenTypeEnum =
+        codeCraftFacade.chatRouter(reqVo.getInitPrompt(), VUE_PROJECT);
+    entity.setCodeGenType(codeGenTypeEnum.getValue());
     save(entity);
     return entity.getId();
   }
@@ -197,7 +200,7 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     wrapper.lt(SysApp::getId, queryReqVo.getMaxId());
     wrapper.orderBy(SysApp::getPriority, Objects.equals(queryReqVo.getOrderBy(), PageRequest.ASC));
     wrapper.orderBy(
-        SysApp::getUpdateTime, Objects.equals(queryReqVo.getOrderBy(), PageRequest.DESC));
+        SysApp::getUpdateTime, Objects.equals(queryReqVo.getOrderBy(), PageRequest.ASC));
     return wrapper;
   }
 
@@ -216,7 +219,7 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getByValue(app.getCodeGenType());
 
     String targetPath = PathUtil.buildPath(PathUtil.PREVIEW_DIR, codeGenType, appId);
-    if (!UserUtil.isAdmin() || !UserUtil.isMe(app.getUserId())) {
+    if (!reBuild || !UserUtil.isAdmin() || !UserUtil.isMe(app.getUserId())) {
       // 不是本人只查看是否存在
       return targetPath.substring(targetPath.lastIndexOf("/") + 1);
     }
@@ -224,18 +227,9 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     String sourcePath = PathUtil.buildPath(PathUtil.TEMP_DIR, codeGenType, appId);
     String deployPath = PathUtil.buildPath(PathUtil.DEPLOY_DIR, codeGenType, appId);
 
-    if (reBuild) {
-      copyAndBuildFromOriginal(appId, sourcePath, codeGenType);
-    } else if (FileUtil.exist(deployPath)) {
-      // 一般部署都是完整内容文件,但是为了系统完整还是需要进判断
-      if (FileUtil.exist(deployPath, "index.html")) {
-        return copyFromSourcePath(deployPath, targetPath, appId, codeGenType);
-      }
-      copyAndBuildFromOriginal(appId, sourcePath, codeGenType);
-    } else if (!FileUtil.exist(sourcePath)) {
+    if (reBuild || !FileUtil.exist(sourcePath)) {
       copyAndBuildFromOriginal(appId, sourcePath, codeGenType);
     }
-
     return copyFromSourcePath(sourcePath, targetPath, appId, codeGenType);
   }
 

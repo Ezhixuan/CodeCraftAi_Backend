@@ -26,6 +26,9 @@ public class AppInfoCommonResVo implements Serializable {
   @Schema(description = "部署时间")
   private LocalDateTime deployTime;
 
+  @Schema(description = "代码生成类型")
+  private String codeGenType;
+
   @Schema(description = "用户 id")
   private Long userId;
 
@@ -47,6 +50,7 @@ public class AppInfoCommonResVo implements Serializable {
     appInfoCommonResVo.setName(sysApp.getName());
     appInfoCommonResVo.setCover(sysApp.getCover());
     appInfoCommonResVo.setDeployTime(sysApp.getDeployTime());
+    appInfoCommonResVo.setCodeGenType(sysApp.getCodeGenType());
     appInfoCommonResVo.setUserId(sysApp.getUserId());
     appInfoCommonResVo.setCreateTime(sysApp.getCreateTime());
     appInfoCommonResVo.setUpdateTime(sysApp.getUpdateTime());
