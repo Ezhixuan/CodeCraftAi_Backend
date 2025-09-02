@@ -86,15 +86,6 @@ public interface SysAppService extends IService<SysApp> {
   String copyToPreview(Long appId, boolean reBuild);
 
   /**
-   * 重定向到预览页面 根据预览标识重定向到对应的预览页面
-   *
-   * @since 0.0.2beta
-   * @param previewKey 预览标识
-   * @param response HTTP响应对象
-   */
-  void redirect(String previewKey, HttpServletResponse response);
-
-  /**
    * 获取应用状态 根据应用ID获取应用的状态信息
    *
    * @since 0.0.2beta
@@ -120,4 +111,14 @@ public interface SysAppService extends IService<SysApp> {
    * @since 0.0.3beta
    */
   void doZip(Long appId, HttpServletResponse response);
+
+  /**
+   * 获取预览或部署的URL地址 根据预览标识和是否为本地环境返回对应的URL地址
+   *
+   * @since 0.0.3beta
+   * @param previewKey 预览标识
+   * @param hasLocal 是否为本地环境
+   * @return String URL地址
+   */
+  String getUrl(String previewKey, boolean hasLocal);
 }

@@ -5,7 +5,8 @@ import java.io.InputStream;
 /**
  * 对象存储服务接口 定义了上传、下载、删除等操作的统一接口
  *
- * @version 0.0.2beta
+ * @since 0.0.2beta
+ * @version 0.0.3beta
  * @author ezhixuan
  */
 public interface ObjectStorageService {
@@ -41,4 +42,13 @@ public interface ObjectStorageService {
    * @return boolean 删除是否成功
    */
   boolean doDelete(String urlStr);
+
+  /**
+   * 判断给定的URL是否属于当前存储服务
+   *
+   * @since 0.0.3beta
+   * @param url 文件的URL地址
+   * @return boolean 如果URL属于当前存储服务则返回true，否则返回false
+   */
+  boolean matchUrl(String url);
 }

@@ -19,7 +19,8 @@ import static org.springframework.util.CollectionUtils.isEmpty;
  * 负责管理多种对象存储服务（如本地存储、MinIO、GitHub、腾讯云COS等）的初始化和实例获取
  *
  * @author ezhixuan
- * @version 0.0.2beta
+ * @version 0.0.3beta
+ * @since 0.0.2beta
  */
 @Slf4j
 @Component
@@ -56,6 +57,43 @@ public class OssManager {
         .filter(service -> Objects.equals(service.getUploadModel(), type))
         .findAny()
         .orElseThrow(() -> new RuntimeException("图片上传功能暂时停止提供"));
+  }
+
+  /**
+   * 根据指定的对象存储模型获取对应的服务实例
+   *
+   * @param ossModel 对象存储模型枚举值
+   * @return ObjectStorageService 对应的对象存储服务实例
+   * @throws RuntimeException 当没有找到匹配的对象存储服务时抛出异常
+   */
+  public ObjectStorageService getInstance(OssModelEnum ossModel) {
+    return serviceList.stream()
+        .filter(service -> Objects.equals(service.getUploadModel(), ossModel))
+        .findAny()
+        .orElseThrow(() -> new RuntimeException("图片上传功能暂时停止提供"));
+  }
+
+  /**
+   * 根据URL删除文件<br>
+   * 通过匹配URL找到对应的存储服务，并执行删除操作
+   *
+   * @since 0.0.3beta
+   * @param url 需要删除的文件URL地址
+   * @return boolean 删除是否成功
+   */
+  public boolean doDelete(String url) {
+    try {
+      return serviceList.stream()
+          .filter(service -> service.matchUrl(url))
+          // 一般只会有一个,但是为了不错误,同时 url 也是唯一的,也不会导致误删
+          .map(service -> service.doDelete(url))
+          .filter(deleted -> deleted)
+          .findAny()
+          .orElse(false);
+    } catch (Exception exception) {
+      log.error("删除文件失败", exception);
+      return false;
+    }
   }
 
   /**

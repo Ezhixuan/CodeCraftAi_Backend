@@ -46,6 +46,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
@@ -170,11 +172,18 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
    */
   @Override
   public boolean removeById(Serializable id) {
-    if (isNull(id)) {
-      return false;
-    }
     try {
-      chatHistoryService.removeByAppId(Long.parseLong(id.toString()));
+        SysApp sysApp = getById(id);
+        Optional.ofNullable(sysApp).ifPresent(app -> {
+            long appId = app.getId();
+            chatHistoryService.removeByAppId(appId);
+            pictureService.delete(app.getCover());
+            CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getByValue(app.getCodeGenType());
+            FileUtil.del(PathUtil.buildPath(PathUtil.ORIGINAL_DIR, codeGenType, appId));
+            FileUtil.del(PathUtil.buildPath(PathUtil.TEMP_DIR, codeGenType,appId));
+            FileUtil.del(PathUtil.buildPath(PathUtil.PREVIEW_DIR, codeGenType, appId));
+            FileUtil.del(PathUtil.buildPath(PathUtil.DEPLOY_DIR, codeGenType, appId));
+        });
     } catch (Exception error) {
       log.error("历史记录删除失败, appId = {}", id);
     }
@@ -230,7 +239,7 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     if (reBuild || !FileUtil.exist(sourcePath)) {
       copyAndBuildFromOriginal(appId, sourcePath, codeGenType);
     }
-    return copyFromSourcePath(sourcePath, targetPath, appId, codeGenType);
+    return copyFromSourcePath(sourcePath, targetPath, app, codeGenType);
   }
 
   /**
@@ -275,7 +284,7 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
    * @return String 目标路径的最后一级目录名
    */
   private String copyFromSourcePath(
-      String sourcePath, String targetPath, long appId, CodeGenTypeEnum codeGenType) {
+      String sourcePath, String targetPath, SysApp app, CodeGenTypeEnum codeGenType) {
     File sourceDir = FileUtil.file(sourcePath);
     if (Objects.equals(codeGenType, VUE_PROJECT)) {
       sourceDir = FileUtil.file(sourceDir, "/dist");
@@ -285,19 +294,8 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     FileUtil.clean(targetDir);
     FileUtil.copyContent(sourceDir, targetDir, true);
     String previewKey = targetPath.substring(targetPath.lastIndexOf("/") + 1);
-    updateAppCover(appId, previewKey);
+    updateAppCover(app, previewKey);
     return previewKey;
-  }
-
-  @Override
-  public void redirect(String previewKey, HttpServletResponse response) {
-    String redirectUrl = getUrl(previewKey, false);
-    try {
-      response.sendRedirect(redirectUrl);
-    } catch (IOException e) {
-      log.error("重定向失败, redirectUrl:{}", redirectUrl);
-      throw new BusinessException(ErrorCode.SYSTEM_ERROR, "跳转失败");
-    }
   }
 
   @Override
@@ -365,30 +363,26 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
   /**
    * 异步更新应用封面
    *
-   * @param appId 应用ID
+   * @param app 应用
    * @param previewKey 预览键值
    */
-  private void updateAppCover(long appId, String previewKey) {
+  private void updateAppCover(SysApp app, String previewKey) {
     Thread.startVirtualThread(
         () -> {
           try {
-            SysApp sysApp = getById(appId);
-            String cover = sysApp.getCover();
-            if (isNull(sysApp)) {
-              throw new BusinessException(ErrorCode.PARAMS_ERROR, "应用不存在");
-            }
+            String cover = app.getCover();
             String webUrl = getUrl(previewKey, true);
-            String newCover = screenshot(appId, webUrl);
+            String newCover = screenshot(app.getId(), webUrl);
             if (hasText(newCover)) {
               if (!hasText(cover)) {
                 // 应用本身就有封面
                 pictureService.delete(cover);
               }
-              sysApp.setCover(newCover);
-              updateById(sysApp);
+              app.setCover(newCover);
+              updateById(app);
             }
           } catch (Exception e) {
-            log.error("更新应用封面失败, appId:{}", appId);
+            log.error("更新应用封面失败, app:{}", app);
           }
         });
   }
@@ -426,7 +420,8 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
    * @param hasLocal 是否包含本地地址
    * @return 根据参数生成的URL
    */
-  private String getUrl(String previewKey, boolean hasLocal) {
+  @Override
+  public String getUrl(String previewKey, boolean hasLocal) {
     return hasLocal
         ? "http://localhost:8911/api/static/" + previewKey + "/index.html"
         : "/api/static/" + previewKey + "/index.html";

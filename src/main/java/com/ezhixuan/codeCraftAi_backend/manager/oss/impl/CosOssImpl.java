@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Objects;
 
@@ -26,7 +25,8 @@ import java.util.Objects;
  * 提供基于腾讯云COS的对象存储功能，包括文件上传、下载和删除操作
  *
  * @author ezhixuan
- * @version 0.0.2beta
+ * @version 0.0.3beta
+ * @since 0.0.2beta
  */
 @Service
 @RequiredArgsConstructor
@@ -53,7 +53,6 @@ public class CosOssImpl extends AbstractObjectStorageService {
    * @param inputStream 文件输入流
    * @param targetPath 目标存储路径
    * @return String 上传后的文件访问URL
-   * @throws IOException IO异常
    */
   @Override
   public String doUpload(InputStream inputStream, String targetPath) {
@@ -175,5 +174,21 @@ public class CosOssImpl extends AbstractObjectStorageService {
     // 生成cos客户端
     client = new COSClient(cred, clientConfig);
     return client;
+  }
+
+  /**
+   * 判断给定的URL是否属于腾讯云COS存储服务<br>
+   * 通过检查URL是否包含COS存储桶和区域信息来判断
+   *
+   * @since 0.0.3beta
+   * @param url 待匹配的文件URL地址
+   * @return boolean 如果URL属于当前COS存储服务则返回true，否则返回false
+   */
+  @Override
+  public boolean matchUrl(String url) {
+    return url.contains(
+        String.format(
+            "https://%s.cos.%s.myqcloud.com/",
+            cosConfig.getCosBucketName(), cosConfig.getCosRegion()));
   }
 }

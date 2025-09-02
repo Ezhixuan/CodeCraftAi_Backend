@@ -25,7 +25,8 @@ import java.util.Objects;
  * 通过GitHub API实现文件的上传和删除，并使用jsDelivr CDN加速文件访问
  *
  * @author ezhixuan
- * @version 0.0.2beta
+ * @version 0.0.3beta
+ * @since 0.0.2beta
  */
 @Service
 @RequiredArgsConstructor
@@ -209,5 +210,19 @@ public class GitHubOssImpl extends AbstractObjectStorageService {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  /**
+   * 判断给定的URL是否属于GitHub存储服务<br>
+   * 通过检查URL是否包含COS存储桶和区域信息来判断
+   *
+   * @since 0.0.3beta
+   * @param url 待匹配的文件URL地址
+   * @return boolean 如果URL属于当前GitHub存储服务则返回true，否则返回false
+   */
+  @Override
+  public boolean matchUrl(String url) {
+    return url.contains(
+        String.format("%s@%s", gitHubConfig.getGithubRepo(), gitHubConfig.getGithubBranch()));
   }
 }

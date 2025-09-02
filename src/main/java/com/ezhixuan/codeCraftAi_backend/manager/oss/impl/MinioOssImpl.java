@@ -19,7 +19,8 @@ import java.util.Objects;
  * 支持自动创建存储桶、文件上传、删除等操作
  *
  * @author ezhixuan
- * @version 0.0.2beta
+ * @version 0.0.3beta
+ * @since 0.0.2beta
  */
 @Service
 @RequiredArgsConstructor
@@ -171,5 +172,19 @@ public class MinioOssImpl extends AbstractObjectStorageService {
             .credentials(minioConfig.getMinioAccessKey(), minioConfig.getMinioSecretKey())
             .build();
     return client;
+  }
+
+  /**
+   * 判断给定的URL是否属于minio存储服务<br>
+   * 通过检查URL是否包含COS存储桶和区域信息来判断
+   *
+   * @since 0.0.3beta
+   * @param url 待匹配的文件URL地址
+   * @return boolean 如果URL属于当前minio存储服务则返回true，否则返回false
+   */
+  @Override
+  public boolean matchUrl(String url) {
+    return url.contains(
+        String.format("%s/%s", minioConfig.getMinioDomain(), minioConfig.getMinioBucket()));
   }
 }
