@@ -1,19 +1,25 @@
 package com.ezhixuan.codeCraftAi_backend.controller.chatHistory;
 
 import com.ezhixuan.codeCraftAi_backend.annotation.AuthRole;
+import com.ezhixuan.codeCraftAi_backend.common.BaseResponse;
 import com.ezhixuan.codeCraftAi_backend.common.PageResponse;
 import com.ezhixuan.codeCraftAi_backend.common.R;
 import com.ezhixuan.codeCraftAi_backend.controller.chatHistory.vo.ChatInfoResVo;
 import com.ezhixuan.codeCraftAi_backend.controller.chatHistory.vo.ChatQueryReqVo;
+import com.ezhixuan.codeCraftAi_backend.domain.entity.SysChatHistory;
+import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
+import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
 import com.ezhixuan.codeCraftAi_backend.service.SysChatHistoryService;
+import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/chat/history")
@@ -35,5 +41,18 @@ public class ChatHistoryController {
   @GetMapping("/admin/list")
   public PageResponse<ChatInfoResVo> adminList(ChatQueryReqVo reqVo) {
     return R.list(chatHistoryService.list(reqVo));
+  }
+
+  @Operation(summary = "删除对话记录")
+  @DeleteMapping("/{id}")
+  public BaseResponse<Void> delete(@PathVariable Long id, HttpServletRequest request) {
+    SysChatHistory chatHistory = chatHistoryService.getById(id);
+    if (Objects.isNull(chatHistory)
+        || !UserUtil.isAdmin()
+        || UserUtil.isMe(chatHistory.getUserId())) {
+      throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+    }
+    chatHistoryService.removeById(id);
+    return R.success();
   }
 }
