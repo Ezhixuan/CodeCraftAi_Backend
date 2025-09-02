@@ -22,12 +22,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@RequestMapping("/admin/app")
 @RestController
-@RequestMapping("/app/admin")
 @Validated
-@Tag(name = "AdminAppController", description = "应用控制器(管理员)")
 @RequiredArgsConstructor
-public class AdminAppController {
+@Tag(name = "AdminAppController", description = "应用控制器(管理员)")
+public class AppAdminController {
 
   private final SysAppService appService;
   private final SysUserService userService;
@@ -35,7 +35,7 @@ public class AdminAppController {
   @Operation(summary = "获取应用详情")
   @AuthRole
   @GetMapping("/{id}")
-  public BaseResponse<AppInfoAdminResVo> adminGetInfo(@PathVariable Long id) {
+  public BaseResponse<AppInfoAdminResVo> getInfo(@PathVariable Long id) {
     SysApp sysApp = appService.getById(id);
     return R.success(
         AppInfoAdminResVo.build(
@@ -45,7 +45,7 @@ public class AdminAppController {
   @Operation(summary = "获取用户应用列表")
   @AuthRole
   @GetMapping("/list")
-  public PageResponse<AppInfoAdminResVo> adminGetList(@Valid AppQueryReqVo queryReqVo) {
+  public PageResponse<AppInfoAdminResVo> getList(@Valid AppQueryReqVo queryReqVo) {
     Page<SysApp> sysAppPage = appService.getList(queryReqVo, false);
     Set<Long> userIds =
         sysAppPage.getRecords().stream().map(SysApp::getUserId).collect(Collectors.toSet());
@@ -55,7 +55,7 @@ public class AdminAppController {
   @Operation(summary = "更新应用信息")
   @AuthRole
   @PostMapping("/update")
-  public BaseResponse<Void> adminUpdate(@RequestBody @Valid AppUpdateAdminReqVo updateReqVo) {
+  public BaseResponse<Void> update(@RequestBody @Valid AppUpdateAdminReqVo updateReqVo) {
     SysApp entity = updateReqVo.toEntity();
     appService.updateById(entity);
     return R.success();

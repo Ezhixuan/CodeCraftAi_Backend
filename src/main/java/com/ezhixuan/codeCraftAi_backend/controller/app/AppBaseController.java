@@ -1,9 +1,12 @@
 package com.ezhixuan.codeCraftAi_backend.controller.app;
 
 import com.ezhixuan.codeCraftAi_backend.common.BaseResponse;
+import com.ezhixuan.codeCraftAi_backend.common.PageRequest;
 import com.ezhixuan.codeCraftAi_backend.common.PageResponse;
 import com.ezhixuan.codeCraftAi_backend.common.R;
-import com.ezhixuan.codeCraftAi_backend.controller.app.vo.*;
+import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppInfoCommonResVo;
+import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppQueryReqVo;
+import com.ezhixuan.codeCraftAi_backend.controller.app.vo.AppUpdateCommonReqVo;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
 import com.ezhixuan.codeCraftAi_backend.exception.BusinessException;
 import com.ezhixuan.codeCraftAi_backend.exception.ErrorCode;
@@ -13,77 +16,31 @@ import com.ezhixuan.codeCraftAi_backend.utils.UserUtil;
 import com.mybatisflex.core.paginate.Page;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@RestController
 @RequestMapping("/app")
+@RestController
 @Validated
-@Tag(name = "AppController", description = "应用控制器")
 @RequiredArgsConstructor
-public class AppController {
+@Tag(name = "AppController", description = "应用控制器")
+public class AppBaseController {
 
   private final SysAppService appService;
   private final SysUserService userService;
-
-  @Operation(summary = "代码生成")
-  @GetMapping(value = "/generate/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-  public Flux<ServerSentEvent<String>> generateCode(
-      @RequestParam("message") @NotBlank String message,
-      @RequestParam("appId") @NotNull @Min(1) Long appId) {
-    return appService.generateCode(message, appId);
-  }
-
-  @Operation(summary = "通过用户输入生成应用记录")
-  @PostMapping("/generate")
-  public BaseResponse<Long> doGenerate(@RequestBody @Valid AppGenerateReqVo reqVo) {
-    return R.success(appService.doGenerate(reqVo));
-  }
 
   @Operation(summary = "获取应用详情")
   @GetMapping("/{id}")
   public BaseResponse<AppInfoCommonResVo> getInfo(@PathVariable Long id) {
     SysApp sysApp = appService.getById(id);
     return R.success(AppInfoCommonResVo.build(sysApp, userService.getUserVo(sysApp.getUserId())));
-  }
-
-  @Operation(summary = "应用预览")
-  @GetMapping("/preview/{appId}")
-  public void doPreview(
-      @PathVariable("appId") Long appId, boolean reBuild, HttpServletResponse response) {
-    String previewKey = appService.copyToPreview(appId, reBuild);
-    appService.redirect(previewKey, response);
-  }
-
-  @Operation(summary = "应用部署")
-  @PutMapping("/deploy/{appId}")
-  public BaseResponse<String> doDeploy(@PathVariable("appId") Long appId) {
-    return R.success(appService.doDeploy(appId));
-  }
-
-  @Operation(summary = "应用下载")
-  @GetMapping("/download/{appId}")
-  public void doDownload(@PathVariable("appId") Long appId, HttpServletResponse response) {
-    appService.doZip(appId, response);
-  }
-
-  @Operation(summary = "获取应用状态")
-  @GetMapping("/status/{appId}")
-  public BaseResponse<AppStatusResVo> getStatus(@PathVariable("appId") Long id) {
-      return R.success(appService.getStatus(id));
   }
 
   @Operation(summary = "获取用户应用列表")
@@ -104,6 +61,7 @@ public class AppController {
     appQueryReqVo.setPriority(1);
     appQueryReqVo.setPageNo(1);
     appQueryReqVo.setPageSize(30);
+    appQueryReqVo.setOrderBy(PageRequest.DESC);
     Page<SysApp> sysAppPage = appService.getList(appQueryReqVo, false);
     Set<Long> userIds =
         sysAppPage.getRecords().stream().map(SysApp::getUserId).collect(Collectors.toSet());
@@ -113,7 +71,8 @@ public class AppController {
   @Operation(summary = "更新应用信息")
   @PostMapping("/update")
   public BaseResponse<Void> update(@RequestBody @Valid AppUpdateCommonReqVo updateReqVo) {
-    if (!UserUtil.isMe(updateReqVo.getId())) {
+    SysApp sysApp = appService.getById(updateReqVo.getId());
+    if (Objects.isNull(sysApp) || !UserUtil.isAdmin() || !UserUtil.isMe(sysApp.getUserId())) {
       throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
     }
     SysApp entity = updateReqVo.toEntity();
@@ -124,7 +83,8 @@ public class AppController {
   @Operation(summary = "删除应用")
   @DeleteMapping("/{id}")
   public BaseResponse<Void> delete(@PathVariable Long id) {
-    if (!UserUtil.isMe(id)) {
+    SysApp sysApp = appService.getById(id);
+    if (Objects.isNull(sysApp) || !UserUtil.isAdmin() || !UserUtil.isMe(sysApp.getUserId())) {
       throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
     }
     appService.removeById(id);
