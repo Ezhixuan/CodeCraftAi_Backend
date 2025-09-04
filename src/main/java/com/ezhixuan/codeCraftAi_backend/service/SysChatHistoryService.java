@@ -38,7 +38,7 @@ public interface SysChatHistoryService extends IService<SysChatHistory> {
   boolean removeByAppId(@NotNull Long appId);
 
   /**
-   * 滚动列表查询 分页查询对话记录列表，支持滚动加载
+   * 分页查询对话记录列表
    *
    * @param reqVo 查询参数
    * @return Page<ChatInfoResVo> 对话记录分页列表

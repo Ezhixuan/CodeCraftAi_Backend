@@ -38,14 +38,14 @@ public class AppBaseController {
 
   @Operation(summary = "获取应用详情")
   @GetMapping("/{id}")
-  public BaseResponse<AppInfoCommonResVo> getInfo(@PathVariable Long id) {
+  public BaseResponse<AppInfoCommonResVo> getAppInfo(@PathVariable Long id) {
     SysApp sysApp = appService.getById(id);
     return R.success(AppInfoCommonResVo.build(sysApp, userService.getUserVo(sysApp.getUserId())));
   }
 
   @Operation(summary = "获取用户应用列表")
   @GetMapping("/list")
-  public PageResponse<AppInfoCommonResVo> getList(@Valid AppQueryReqVo queryReqVo) {
+  public PageResponse<AppInfoCommonResVo> getAppList(@Valid AppQueryReqVo queryReqVo) {
     Page<SysApp> sysAppPage = appService.getList(queryReqVo, true);
     return R.list(
         appService.convert2Common(
@@ -56,7 +56,7 @@ public class AppBaseController {
 
   @Operation(summary = "获取精选应用列表")
   @GetMapping("/list/featured")
-  public PageResponse<AppInfoCommonResVo> getFeaturedList() {
+  public PageResponse<AppInfoCommonResVo> getAppFeaturedList() {
     AppQueryReqVo appQueryReqVo = new AppQueryReqVo();
     appQueryReqVo.setPriority(1);
     appQueryReqVo.setPageNo(1);
@@ -69,8 +69,8 @@ public class AppBaseController {
   }
 
   @Operation(summary = "更新应用信息")
-  @PostMapping("/update")
-  public BaseResponse<Void> update(@RequestBody @Valid AppUpdateCommonReqVo updateReqVo) {
+  @PutMapping("/update")
+  public BaseResponse<Void> putAppUpdate(@RequestBody @Valid AppUpdateCommonReqVo updateReqVo) {
     SysApp sysApp = appService.getById(updateReqVo.getId());
     if (Objects.isNull(sysApp) || !UserUtil.isAdmin() || !UserUtil.isMe(sysApp.getUserId())) {
       throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
@@ -82,7 +82,7 @@ public class AppBaseController {
 
   @Operation(summary = "删除应用")
   @DeleteMapping("/{id}")
-  public BaseResponse<Void> delete(@PathVariable Long id) {
+  public BaseResponse<Void> delApp(@PathVariable Long id) {
     SysApp sysApp = appService.getById(id);
     if (Objects.isNull(sysApp) || !UserUtil.isAdmin() || !UserUtil.isMe(sysApp.getUserId())) {
       throw new BusinessException(ErrorCode.NO_AUTH_ERROR);

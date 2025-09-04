@@ -35,7 +35,7 @@ public class AppAdminController {
   @Operation(summary = "获取应用详情")
   @AuthRole
   @GetMapping("/{id}")
-  public BaseResponse<AppInfoAdminResVo> getInfo(@PathVariable Long id) {
+  public BaseResponse<AppInfoAdminResVo> getAppInfoAdmin(@PathVariable Long id) {
     SysApp sysApp = appService.getById(id);
     return R.success(
         AppInfoAdminResVo.build(
@@ -45,7 +45,7 @@ public class AppAdminController {
   @Operation(summary = "获取用户应用列表")
   @AuthRole
   @GetMapping("/list")
-  public PageResponse<AppInfoAdminResVo> getList(@Valid AppQueryReqVo queryReqVo) {
+  public PageResponse<AppInfoAdminResVo> getAppListAdmin(@Valid AppQueryReqVo queryReqVo) {
     Page<SysApp> sysAppPage = appService.getList(queryReqVo, false);
     Set<Long> userIds =
         sysAppPage.getRecords().stream().map(SysApp::getUserId).collect(Collectors.toSet());
@@ -54,8 +54,8 @@ public class AppAdminController {
 
   @Operation(summary = "更新应用信息")
   @AuthRole
-  @PostMapping("/update")
-  public BaseResponse<Void> update(@RequestBody @Valid AppUpdateAdminReqVo updateReqVo) {
+  @PutMapping("/update")
+  public BaseResponse<Void> putAppUpdateAdmin(@RequestBody @Valid AppUpdateAdminReqVo updateReqVo) {
     SysApp entity = updateReqVo.toEntity();
     appService.updateById(entity);
     return R.success();

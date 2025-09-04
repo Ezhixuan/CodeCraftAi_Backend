@@ -30,7 +30,7 @@ public class AppCoreController {
 
   @Operation(summary = "代码生成")
   @GetMapping(value = "/generate/code", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-  public Flux<ServerSentEvent<String>> generateCode(
+  public Flux<ServerSentEvent<String>> sseAppGenerateCode(
       @RequestParam("message") @NotBlank String message,
       @RequestParam("appId") @NotNull @Min(1) Long appId) {
     return appService.generateCode(message, appId);
@@ -38,32 +38,32 @@ public class AppCoreController {
 
   @Operation(summary = "通过用户输入生成应用记录")
   @PostMapping("/generate")
-  public BaseResponse<Long> doGenerate(@RequestBody @Valid AppGenerateReqVo reqVo) {
+  public BaseResponse<Long> postAppInfo(@RequestBody @Valid AppGenerateReqVo reqVo) {
     return R.success(appService.doGenerate(reqVo));
   }
 
   @Operation(summary = "应用预览")
   @GetMapping("/preview/{appId}")
-  public BaseResponse<String> doPreview(@PathVariable("appId") Long appId, boolean reBuild) {
+  public BaseResponse<String> getAppPreviewUrl(@PathVariable("appId") Long appId, boolean reBuild) {
     String previewKey = appService.copyToPreview(appId, reBuild);
-    return R.success(appService.getUrl(previewKey, true));
+    return R.success(appService.getUrl(previewKey, false));
   }
 
   @Operation(summary = "应用下载")
   @GetMapping("/download/{appId}")
-  public void doDownload(@PathVariable("appId") Long appId, HttpServletResponse response) {
+  public void getAppDownloadZip(@PathVariable("appId") Long appId, HttpServletResponse response) {
     appService.doZip(appId, response);
   }
 
   @Operation(summary = "应用部署")
   @PutMapping("/deploy/{appId}")
-  public BaseResponse<String> doDeploy(@PathVariable("appId") Long appId) {
+  public BaseResponse<String> putAppDeploy(@PathVariable("appId") Long appId) {
     return R.success(appService.doDeploy(appId));
   }
 
   @Operation(summary = "获取应用状态")
   @GetMapping("/status/{appId}")
-  public BaseResponse<AppStatusResVo> getStatus(@PathVariable("appId") Long id) {
+  public BaseResponse<AppStatusResVo> getAppStatus(@PathVariable("appId") Long id) {
     return R.success(appService.getStatus(id));
   }
 }

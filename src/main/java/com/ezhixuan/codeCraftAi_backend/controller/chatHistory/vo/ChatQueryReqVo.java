@@ -2,7 +2,6 @@ package com.ezhixuan.codeCraftAi_backend.controller.chatHistory.vo;
 
 import com.ezhixuan.codeCraftAi_backend.common.PageRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -19,7 +18,6 @@ public class ChatQueryReqVo extends PageRequest implements Serializable {
   @Schema(description = "对话 id")
   private Long id;
 
-  @NotNull
   @Schema(description = "应用ID")
   private Long appId;
 
