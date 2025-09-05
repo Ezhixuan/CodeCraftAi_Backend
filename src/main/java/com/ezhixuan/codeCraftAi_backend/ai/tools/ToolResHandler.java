@@ -24,7 +24,7 @@ public class ToolResHandler {
     return switch (toolEnum) {
       case WRITE_TOOL -> FileTool.writeToolRes(toolExecution);
       case READ_TOOL -> FileTool.readToolRes(toolExecution);
-      case APP_NAME_TOOL -> "";
+      case APP_NAME_TOOL, FIND_ALL_FILE_PATH_TOOL -> "";
       case UNKNOWN_TOOL -> {
         log.error("未知工具");
         yield String.format("\n\n[%s] %s\n\n", toolEnum.getText(), toolExecution.result());

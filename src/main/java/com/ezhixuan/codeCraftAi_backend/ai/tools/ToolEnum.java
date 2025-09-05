@@ -17,6 +17,8 @@ public enum ToolEnum {
   READ_TOOL("文件读取工具", "readTool"),
   /** 应用名生成工具 */
   APP_NAME_TOOL("应用名生成工具", "generateAppNameTool"),
+  /** 获取该应用下所有文件的相对路径 */
+  FIND_ALL_FILE_PATH_TOOL("获取该应用下所有文件的相对路径", "findAllFilePathTool"),
   /** 未知工具 */
   UNKNOWN_TOOL("未知工具", "unknownTool");
 

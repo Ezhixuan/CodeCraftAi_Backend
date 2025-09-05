@@ -18,6 +18,7 @@ import com.ezhixuan.codeCraftAi_backend.controller.user.vo.UserInfoCommonResVo;
 import com.ezhixuan.codeCraftAi_backend.core.CodeCraftFacade;
 import com.ezhixuan.codeCraftAi_backend.core.builder.BuildExecutor;
 import com.ezhixuan.codeCraftAi_backend.domain.constant.PromptConstant;
+import com.ezhixuan.codeCraftAi_backend.domain.dto.chat.ChatPreProcessedDto;
 import com.ezhixuan.codeCraftAi_backend.domain.dto.sys.chatHistory.SysChatHistorySubmitDto;
 import com.ezhixuan.codeCraftAi_backend.domain.entity.SysApp;
 import com.ezhixuan.codeCraftAi_backend.domain.enums.LoadingStatusEnum;
@@ -36,18 +37,15 @@ import com.mybatisflex.core.query.QueryWrapper;
 import com.mybatisflex.spring.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Service;
@@ -67,6 +65,28 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
   @Resource private SysChatHistoryService chatHistoryService;
   @Resource private PictureService pictureService;
 
+  private static List<File> getFiles(CodeGenTypeEnum codeGenType, File dir) {
+    final FileFilter fileFilter =
+        switch (codeGenType) {
+          case HTML ->
+              // HTML模式只显示HTML文件
+              file -> file.isFile() && file.getName().endsWith(".html");
+          case HTML_MULTI_FILE ->
+              // 多文件模式显示所有文件
+              file -> file.isFile();
+          case VUE_PROJECT ->
+              // Vue项目模式过滤掉node_modules和隐藏文件
+              file ->
+                  file.isFile()
+                      && !file.getName().equals("node_modules")
+                      && !file.getName().startsWith(".");
+          default ->
+              // 默认显示所有文件
+              file -> file.isFile();
+        };
+    return FileUtil.loopFiles(dir, fileFilter);
+  }
+
   @Override
   public Flux<ServerSentEvent<String>> generateCode(String message, Long appId) {
     SysApp sysApp = getById(appId);
@@ -77,6 +97,7 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
       throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
     }
     Long userId = UserUtil.getLoginUserId();
+    ChatPreProcessedDto chatPreProcessedDto = new ChatPreProcessedDto(message);
     // 存储用户对话信息
     chatHistoryService.save(
         SysChatHistorySubmitDto.builder()
@@ -86,14 +107,19 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
             .appId(appId)
             .build());
     if (sysApp.isFirstChat()) {
-      message = message + PromptConstant.GENERATE_APP_NAME;
+      chatPreProcessedDto.setExtraContent(PromptConstant.GENERATE_APP_NAME);
       sysApp.setFirstChat(false);
       updateById(sysApp);
+    }
+    if (hasText(chatPreProcessedDto.getSelectedContent())) {
+      chatPreProcessedDto.setExtraContent(PromptConstant.SELECTED_ELEMENT);
+      chatPreProcessedDto.setPathContent(findAllFilePath(appId));
+      chatPreProcessedDto.setFileContent(getRouterIndexContent(appId));
     }
     StringBuilder contentBuilder = new StringBuilder();
     CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getByValue(sysApp.getCodeGenType());
     return codeCraftFacade
-        .chatAndSaveStream(message, codeGenType, appId)
+        .chatAndSaveStream(chatPreProcessedDto.getSendContent(), codeGenType, appId)
         .doOnNext(contentBuilder::append)
         .doOnComplete(
             () -> {
@@ -425,5 +451,42 @@ public class SysAppServiceImpl extends ServiceImpl<SysAppMapper, SysApp> impleme
     return hasLocal
         ? "http://localhost:8911/api/static/" + previewKey + "/index.html"
         : "/api/static/" + previewKey + "/index.html";
+  }
+
+  @Override
+  public String findAllFilePath(Long appId) {
+    SysApp sysApp = getById(appId);
+    if (isNull(sysApp)) {
+      return "";
+    }
+    CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getByValue(sysApp.getCodeGenType());
+    String dirPath = PathUtil.buildPath(PathUtil.ORIGINAL_DIR, codeGenType, appId);
+    StringBuilder sb = new StringBuilder();
+    List<File> files = getFiles(codeGenType, FileUtil.file(dirPath));
+    for (File file : files) {
+      sb.append(file.getPath().substring(dirPath.length())).append("\n");
+    }
+    return sb.toString();
+  }
+
+  public String getRouterIndexContent(Long appId) {
+    SysApp sysApp = getById(appId);
+    if (isNull(sysApp)) {
+      return "";
+    }
+    CodeGenTypeEnum codeGenType = CodeGenTypeEnum.getByValue(sysApp.getCodeGenType());
+    if (Objects.equals(codeGenType, VUE_PROJECT)) {
+      String dirPath = PathUtil.buildPath(PathUtil.ORIGINAL_DIR, codeGenType, appId);
+      String routerPath =
+          dirPath
+              + File.separator
+              + "src"
+              + File.separator
+              + "router"
+              + File.separator
+              + "index.js";
+      return FileUtil.readUtf8String(routerPath);
+    }
+    return "";
   }
 }

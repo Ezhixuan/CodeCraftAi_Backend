@@ -15,10 +15,12 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.util.List;
-import java.util.Objects;
+
+import static java.util.Objects.isNull;
 
 /**
  * 文件工具类 提供将AI生成的代码内容写入文件的功能，支持按相对路径保存到指定目录 主要用于Vue项目的代码生成和保存
@@ -70,7 +72,6 @@ public class FileTool {
     String relativeFilePath = jsonObject.getStr("relativePath");
     Integer startLine = jsonObject.getInt("startLine");
     Integer endLine = jsonObject.getInt("endLine");
-    String res = toolExecution.result();
     ToolEnum readTool = ToolEnum.READ_TOOL;
     String result =
         String.format(
@@ -98,7 +99,7 @@ public class FileTool {
       @ToolMemoryId long memoryId) {
     try {
       SysApp sysApp = appService.getById(memoryId);
-      if (Objects.isNull(sysApp)) {
+      if (isNull(sysApp)) {
         return "项目不存在,结束对话";
       }
       String path =
@@ -132,7 +133,7 @@ public class FileTool {
       @ToolMemoryId long memoryId) {
     try {
       SysApp sysApp = appService.getById(memoryId);
-      if (Objects.isNull(sysApp)) {
+      if (isNull(sysApp)) {
         return "项目不存在,结束对话";
       }
       String basePath =
@@ -164,6 +165,27 @@ public class FileTool {
       String errorMessage = String.format("读取文件 %s 失败: %s", relativePath, e.getMessage());
       log.error(errorMessage, e);
       return errorMessage;
+    }
+  }
+
+  /**
+   * 获取应用下所有文件的相对路径 <br>
+   * 根据应用的代码生成类型，获取经过过滤的文件列表
+   *
+   * @since 0.0.3beta
+   * @param appId 应用ID，用于查找对应的应用和文件目录
+   * @return 格式化的文件列表字符串，每个文件名占一行
+   */
+  @Tool("获取该应用下所有文件的相对路径 如果希望找到某一个文件但是不知道该文件的相对路径,请调用该方法")
+  public String findAllFilePathTool(@ToolMemoryId Long appId) {
+    try {
+      String allFilePath = appService.findAllFilePath(appId);
+      if (!StringUtils.hasText(allFilePath)) {
+        return "没有找到文件,终止对话";
+      }
+      return String.format("应用下所有文件的相对路径为:\n%s", allFilePath);
+    } catch (Exception exception) {
+      return "没有找到文件,终止对话";
     }
   }
 }

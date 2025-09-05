@@ -121,4 +121,13 @@ public interface SysAppService extends IService<SysApp> {
    * @return String URL地址
    */
   String getUrl(String previewKey, boolean hasLocal);
+
+  /**
+   * 根据应用 id 查找该应用所处源目录下的所有文件的相对路径
+   *
+   * @param appId 应用 ID
+   * @since 0.0.3beta
+   * @return String 所有的文件相对路径拼接
+   */
+  String findAllFilePath(Long appId);
 }

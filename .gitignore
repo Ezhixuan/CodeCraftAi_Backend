@@ -43,3 +43,4 @@ build/
 /temp/
 /codeOutPut/
 /.lingma/
+/src/main/resources/application-ollma.yml
