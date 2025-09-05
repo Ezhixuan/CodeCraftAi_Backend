@@ -117,7 +117,7 @@ public class CodeCraftFacade {
   public CodeGenTypeEnum chatRouter(@NotBlank String userMessage, CodeGenTypeEnum defaultType) {
     try {
       CodeCraftAiChatService chatService = aiModelFactory.getRouterAiService();
-      return chatService.chatRouter(userMessage);
+      return CodeGenTypeEnum.getByValue(chatService.chatRouter(userMessage));
     } catch (Exception exception) {
       return defaultType;
     }

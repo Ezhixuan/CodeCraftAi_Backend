@@ -3,7 +3,6 @@ package com.ezhixuan.codeCraftAi_backend.ai;
 import com.ezhixuan.codeCraftAi_backend.ai.model.AiChatBaseResDto;
 import com.ezhixuan.codeCraftAi_backend.ai.model.AiChatHtmlCssScriptResDto;
 import com.ezhixuan.codeCraftAi_backend.ai.model.AiChatHtmlResDto;
-import com.ezhixuan.codeCraftAi_backend.ai.model.enums.CodeGenTypeEnum;
 import dev.langchain4j.service.MemoryId;
 import dev.langchain4j.service.SystemMessage;
 import dev.langchain4j.service.TokenStream;
@@ -58,7 +57,7 @@ public interface CodeCraftAiChatService {
    * @since 0.0.3beta
    */
   @SystemMessage(fromResource = "prompt/codeCraft-router-system-prompt.txt")
-  CodeGenTypeEnum chatRouter(String userMessage);
+  String chatRouter(String userMessage);
 
   /**
    * 获取html信息 (带流式返回)

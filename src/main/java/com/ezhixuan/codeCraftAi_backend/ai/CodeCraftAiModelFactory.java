@@ -97,7 +97,10 @@ public class CodeCraftAiModelFactory {
   }
 
   public CodeCraftAiChatService getRouterAiService() {
-    return AiServices.builder(CodeCraftAiChatService.class).chatModel(routerChatModel).build();
+    return AiServices.builder(CodeCraftAiChatService.class)
+        .chatModel(routerChatModel)
+        .chatMemory(generateChatHistory(-1))
+        .build();
   }
 
   /**

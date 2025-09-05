@@ -46,4 +46,12 @@ class CodeCraftFacadeTest {
         String joined = String.join("", blocked);
         System.out.println(joined);
     }
+
+
+    @Test
+    void TestCodeCraftAiChatServiceChatRouter() {
+        String userMessage = "我想要一个使用 vue 创建的类似 qq 音乐界面设计的网页,并且能够支持上传音乐和播放";
+        CodeGenTypeEnum response = codeCraftFacade.chatRouter(userMessage, CodeGenTypeEnum.VUE_PROJECT);
+        System.out.println(response);
+    }
 }

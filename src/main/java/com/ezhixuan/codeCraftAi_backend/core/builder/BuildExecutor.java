@@ -30,15 +30,20 @@ public class BuildExecutor {
   public static boolean build(Long appId, CodeGenTypeEnum codeGenTypeEnum, boolean async) {
     log.info("开始执行构建任务，应用ID: {}, 代码生成类型: {}, 异步: {}", appId, codeGenTypeEnum, async);
     String targetPath = PathUtil.buildPath(PathUtil.TEMP_DIR, codeGenTypeEnum, appId);
-    if (FileUtil.exist(targetPath)) {
-      FileUtil.clean(targetPath);
+    try {
+      if (FileUtil.exist(targetPath)) {
+        FileUtil.clean(targetPath);
+      }
+      String originalPath = PathUtil.buildPath(PathUtil.ORIGINAL_DIR, codeGenTypeEnum, appId);
+      FileUtil.copyContent(FileUtil.file(originalPath), FileUtil.file(targetPath), true);
+      return switch (codeGenTypeEnum) {
+        case HTML, HTML_MULTI_FILE -> true;
+        case VUE_PROJECT -> VUE_PROJECT_BUILDER.build(targetPath, async);
+      };
+    } catch (Exception exception) {
+      log.error("构建任务执行失败，应用ID: {}, 构建路径: {}, 错误信息: {}", appId, targetPath, exception.getMessage());
+      return false;
     }
-    String originalPath = PathUtil.buildPath(PathUtil.ORIGINAL_DIR, codeGenTypeEnum, appId);
-    FileUtil.copyContent(FileUtil.file(originalPath), FileUtil.file(targetPath), true);
-    return switch (codeGenTypeEnum) {
-      case HTML, HTML_MULTI_FILE -> true;
-      case VUE_PROJECT -> VUE_PROJECT_BUILDER.build(targetPath, async);
-    };
   }
 
   /**
