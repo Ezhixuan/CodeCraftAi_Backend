@@ -4,10 +4,11 @@
 
 ## 核心技术栈
 
-- Vue 3.x（组合式 API）
-- Vite
-- Vue Router 4.x
+- Vue 3.4+（组合式 API + script setup 语法糖）
+- Vite 5.0+（下一代前端构建工具）
+- Vue Router 4.2+（官方路由管理器）
 - Node.js 18+ 兼容
+- 现代 CSS3（Grid、Flexbox、CSS 变量）
 
 ## 项目结构
 
@@ -40,9 +41,10 @@
 
 1）vite.config.js 必须配置 base 路径以支持子路径部署、需要支持通过 @ 引入文件、不要配置端口号
 
-
+```javascript
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
   base: './',
@@ -51,38 +53,68 @@ export default defineConfig({
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
+  },
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    minify: 'terser'
   }
 })
+```
 
 
-2）路由配置必须使用 hash 模式，避免服务器端路由配置问题
+2）路由配置推荐使用 History 模式，支持更好的 SEO 和用户体验
 
-import { createRouter, createWebHashHistory } from 'vue-router'
+```javascript
+import { createRouter, createWebHistory } from 'vue-router'
+
+const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: () => import('@/pages/Home.vue'),
+    meta: { title: '首页' }
+  },
+  {
+    path: '/about',
+    name: 'About',
+    component: () => import('@/pages/About.vue'),
+    meta: { title: '关于' }
+  }
+]
 
 const router = createRouter({
-  history: createWebHashHistory(),
-  routes: [
-    // 路由配置
-  ]
+  history: createWebHistory(),
+  routes
 })
+
+export default router
+```
 
 
 3）package.json 文件参考：
 
+```json
 {
+  "name": "vue-project",
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
-    "vue": "^3.3.4",
-    "vue-router": "^4.2.4"
+    "vue": "^3.4.0",
+    "vue-router": "^4.2.5"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^4.2.3",
-    "vite": "^4.4.5"
+    "@vitejs/plugin-vue": "^5.0.0",
+    "vite": "^5.0.0"
   }
 }
+```
 
 
 ## 网站内容要求
